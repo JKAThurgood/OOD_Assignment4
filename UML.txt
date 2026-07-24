@@ -1,0 +1,173 @@
+@startuml
+
+skinparam classAttributeIconSize 0
+
+package "Facade" {
+
+    class D5700Computer <<Facade>> {
+        +loadProgram(data: ByteArray)
+        +start()
+        +stop()
+        +reset()
+    }
+}
+
+package "CPU" {
+
+    class CPU {
+        -registers : Byte[8]
+        -pc : Int
+        -timer : Byte
+        -address : Int
+        -memoryFlag : Boolean
+
+        +cycle()
+        +fetchInstruction() : Short
+        +incrementPC()
+        +skipInstruction()
+        +terminate(msg:String)
+    }
+}
+
+package "Instructions" {
+
+    abstract class Instruction <<Template Method>> {
+        +execute(cpu:CPU)
+
+        #decode(opcode:Short)
+        #validate(cpu:CPU)
+        #perform(cpu:CPU)
+
+        #shouldIncrementPC() : Boolean
+        #incrementAmount() : Int
+    }
+
+    class StoreInstruction
+    class AddInstruction
+    class SubInstruction
+    class ReadInstruction
+    class WriteInstruction
+    class JumpInstruction
+    class ReadKeyboardInstruction
+    class SwitchMemoryInstruction
+    class SkipEqualInstruction
+    class SkipNotEqualInstruction
+    class SetAInstruction
+    class SetTInstruction
+    class ReadTInstruction
+    class ConvertBase10Instruction
+    class ConvertAsciiInstruction
+    class DrawInstruction
+
+    Instruction <|-- StoreInstruction
+    Instruction <|-- AddInstruction
+    Instruction <|-- SubInstruction
+    Instruction <|-- ReadInstruction
+    Instruction <|-- WriteInstruction
+    Instruction <|-- JumpInstruction
+    Instruction <|-- ReadKeyboardInstruction
+    Instruction <|-- SwitchMemoryInstruction
+    Instruction <|-- SkipEqualInstruction
+    Instruction <|-- SkipNotEqualInstruction
+    Instruction <|-- SetAInstruction
+    Instruction <|-- SetTInstruction
+    Instruction <|-- ReadTInstruction
+    Instruction <|-- ConvertBase10Instruction
+    Instruction <|-- ConvertAsciiInstruction
+    Instruction <|-- DrawInstruction
+}
+
+package "Factory" {
+
+    class InstructionFactory <<Factory>> {
+        +create(opcode:Short) : Instruction
+    }
+}
+
+package "Memory" {
+
+    interface MemoryDevice {
+        +read(address:Int) : Byte
+        +write(address:Int,value:Byte)
+    }
+
+    class RAM {
+        -data : Byte[4096]
+    }
+
+    class ROM {
+        -data : Byte[4096]
+        -writable : Boolean
+    }
+
+    MemoryDevice <|.. RAM
+    MemoryDevice <|.. ROM
+}
+
+package "Strategy" {
+
+    interface MemoryStrategy {
+        +read(cpu:CPU) : Byte
+        +write(cpu:CPU,value:Byte)
+    }
+
+    class RamStrategy
+    class RomStrategy
+
+    MemoryStrategy <|.. RamStrategy
+    MemoryStrategy <|.. RomStrategy
+}
+
+package "IO" {
+
+    class Screen <<Singleton>> {
+        -frameBuffer : Byte[64]
+
+        +getInstance() : Screen
+        +draw(ascii:Byte,row:Int,col:Int)
+        +render()
+    }
+
+    class Keyboard {
+        +readHexByte() : Byte
+    }
+}
+
+package "Scheduling" {
+
+    class CpuScheduler {
+        +start()
+        +stop()
+    }
+
+    class TimerService {
+        +start()
+        +stop()
+        +tick()
+    }
+}
+
+'=========================
+' Relationships
+'=========================
+
+D5700Computer *-- CPU
+D5700Computer *-- RAM
+D5700Computer *-- ROM
+D5700Computer *-- Screen
+D5700Computer *-- Keyboard
+D5700Computer *-- CpuScheduler
+D5700Computer *-- TimerService
+
+CPU --> InstructionFactory
+CPU --> MemoryStrategy
+
+InstructionFactory ..> Instruction
+
+RamStrategy --> RAM
+RomStrategy --> ROM
+
+CpuScheduler --> CPU
+TimerService --> CPU
+
+@enduml
