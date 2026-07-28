@@ -5,6 +5,14 @@ skinparam classAttributeIconSize 0
 package "Facade" {
 
     class D5700Computer <<Facade>> {
+        +cpu : CPU
+        +ram : RAM
+        +rom : ROM
+        +screen : Screen
+        +keyboard : Keyboard
+        -cpuScheduler : CpuScheduler
+        -timerService : TimerService
+
         +loadProgram(data: ByteArray)
         +start()
         +stop()
@@ -15,11 +23,14 @@ package "Facade" {
 package "CPU" {
 
     class CPU {
-        -registers : Byte[8]
-        -pc : Int
-        -timer : Byte
-        -address : Int
-        -memoryFlag : Boolean
+        +registers : Byte[8]
+        +pc : Int
+        +timer : Byte
+        +address : Int
+        +memoryFlag : Boolean
+        +memoryStrategy : MemoryStrategy?
+        +rom : MemoryDevice?
+        -terminated : Boolean
 
         +cycle()
         +fetchInstruction() : Short
@@ -31,29 +42,23 @@ package "CPU" {
 
 package "Instructions" {
 
-    abstract class Instruction <<Template Method>> {
-        +execute(cpu:CPU)
-
-        #decode(opcode:Short)
-        #validate(cpu:CPU)
-        #perform(cpu:CPU)
-
-        #shouldIncrementPC() : Boolean
-        #incrementAmount() : Int
-    }
+    abstract class Instruction <<Template Method>>
 
     class StoreInstruction
     class AddInstruction
     class SubInstruction
     class ReadInstruction
+
     class WriteInstruction
     class JumpInstruction
     class ReadKeyboardInstruction
     class SwitchMemoryInstruction
+
     class SkipEqualInstruction
     class SkipNotEqualInstruction
     class SetAInstruction
     class SetTInstruction
+
     class ReadTInstruction
     class ConvertBase10Instruction
     class ConvertAsciiInstruction
@@ -75,6 +80,22 @@ package "Instructions" {
     Instruction <|-- ConvertBase10Instruction
     Instruction <|-- ConvertAsciiInstruction
     Instruction <|-- DrawInstruction
+
+    StoreInstruction -[hidden]- AddInstruction
+    AddInstruction -[hidden]- SubInstruction
+    SubInstruction -[hidden]- ReadInstruction
+
+    WriteInstruction -[hidden]- JumpInstruction
+    JumpInstruction -[hidden]- ReadKeyboardInstruction
+    ReadKeyboardInstruction -[hidden]- SwitchMemoryInstruction
+
+    SkipEqualInstruction -[hidden]- SkipNotEqualInstruction
+    SkipNotEqualInstruction -[hidden]- SetAInstruction
+    SetAInstruction -[hidden]- SetTInstruction
+
+    ReadTInstruction -[hidden]- ConvertBase10Instruction
+    ConvertBase10Instruction -[hidden]- ConvertAsciiInstruction
+    ConvertAsciiInstruction -[hidden]- DrawInstruction
 }
 
 package "Factory" {
@@ -123,9 +144,10 @@ package "IO" {
     class Screen <<Singleton>> {
         -frameBuffer : Byte[64]
 
-        +getInstance() : Screen
+        +instance() : Screen
         +draw(ascii:Byte,row:Int,col:Int)
-        +render()
+        +render() : ByteArray
+        +clear()
     }
 
     class Keyboard {
@@ -161,6 +183,7 @@ D5700Computer *-- TimerService
 
 CPU --> InstructionFactory
 CPU --> MemoryStrategy
+CPU --> MemoryDevice
 
 InstructionFactory ..> Instruction
 
@@ -169,5 +192,7 @@ RomStrategy --> ROM
 
 CpuScheduler --> CPU
 TimerService --> CPU
+
+DrawInstruction ..> Screen
 
 @enduml

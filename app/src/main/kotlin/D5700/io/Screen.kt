@@ -16,6 +16,10 @@ class Screen private constructor() {
 
     fun render(): ByteArray = frameBuffer.copyOf()
 
+    fun clear() {
+        frameBuffer.fill(0)
+    }
+
     private fun validatePosition(row: Int, column: Int) {
         require(row in 0..7) { "Row must be between 0 and 7" }
         require(column in 0..7) { "Column must be between 0 and 7" }
