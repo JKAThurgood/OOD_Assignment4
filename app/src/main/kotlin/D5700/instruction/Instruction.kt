@@ -10,6 +10,9 @@ abstract class Instruction {
         decode(opcode)
         validate(cpu)
         perform(cpu)
+        if (cpu.isHalted()) {
+            return
+        }
         updateProgramCounter(cpu)
     }
 

@@ -58,12 +58,18 @@ class CPU {
 
     private var terminated = false
 
+    fun isHalted(): Boolean = terminated
+
     fun cycle() {
         if (terminated) {
             return
         }
-        val instruction = instructionFactory.create(fetchInstruction())
-        instruction.execute(this)
+        try {
+            val instruction = instructionFactory.create(fetchInstruction())
+            instruction.execute(this)
+        } catch (_: IllegalStateException) {
+            terminated = true
+        }
     }
 
     fun fetchInstruction(): Short {

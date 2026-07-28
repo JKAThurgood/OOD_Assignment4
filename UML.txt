@@ -45,6 +45,7 @@ package "Instructions" {
     abstract class Instruction <<Template Method>>
 
     class StoreInstruction
+    class HaultInstruction
     class AddInstruction
     class SubInstruction
     class ReadInstruction
@@ -68,6 +69,7 @@ package "Instructions" {
     Instruction <|-- AddInstruction
     Instruction <|-- SubInstruction
     Instruction <|-- ReadInstruction
+    Instruction <|-- HaltInstruction
     Instruction <|-- WriteInstruction
     Instruction <|-- JumpInstruction
     Instruction <|-- ReadKeyboardInstruction

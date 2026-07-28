@@ -32,6 +32,9 @@ class D5700Computer {
     }
 
     fun start() {
+        if (cpu.isHalted()) {
+            cpu.terminate("Program already halted")
+        }
         cpuScheduler.start()
         timerService.start()
     }

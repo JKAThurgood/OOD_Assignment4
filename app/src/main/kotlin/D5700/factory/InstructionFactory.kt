@@ -4,6 +4,7 @@ import D5700.instruction.AddInstruction
 import D5700.instruction.ConvertAsciiInstruction
 import D5700.instruction.ConvertBase10Instruction
 import D5700.instruction.DrawInstruction
+import D5700.instruction.HaltInstruction
 import D5700.instruction.Instruction
 import D5700.instruction.JumpInstruction
 import D5700.instruction.ReadInstruction
@@ -22,7 +23,7 @@ class InstructionFactory {
     fun create(opcode: Short): Instruction {
         val nibble = (opcode.toInt() ushr 12) and 0xF
         return when (nibble) {
-            0x0 -> StoreInstruction()
+            0x0 -> if (opcode.toInt() == 0x0000) HaltInstruction() else StoreInstruction()
             0x1 -> AddInstruction()
             0x2 -> SubInstruction()
             0x3 -> ReadInstruction()
