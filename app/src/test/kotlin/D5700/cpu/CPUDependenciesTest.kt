@@ -1,13 +1,13 @@
-package D5700.cpu
+package d5700.cpu
 
-import D5700.instruction.DrawInstruction
-import D5700.instruction.ReadKeyboardInstruction
-import D5700.io.Display
-import D5700.io.InputDevice
-import D5700.memory.RAM
-import D5700.memory.ROM
-import D5700.strategy.RamStrategy
-import D5700.strategy.RomStrategy
+import d5700.instruction.DrawInstruction
+import d5700.instruction.ReadKeyboardInstruction
+import d5700.io.Display
+import d5700.io.InputDevice
+import d5700.memory.RAM
+import d5700.memory.ROM
+import d5700.strategy.RamStrategy
+import d5700.strategy.RomStrategy
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

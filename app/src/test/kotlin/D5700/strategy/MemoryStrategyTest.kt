@@ -1,8 +1,8 @@
-package D5700.strategy
+package d5700.strategy
 
-import D5700.cpu.CPU
-import D5700.memory.RAM
-import D5700.memory.ROM
+import d5700.cpu.CPU
+import d5700.memory.RAM
+import d5700.memory.ROM
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

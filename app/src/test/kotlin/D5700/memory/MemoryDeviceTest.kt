@@ -1,4 +1,4 @@
-package D5700.memory
+package d5700.memory
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows

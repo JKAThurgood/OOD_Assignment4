@@ -1,9 +1,9 @@
-package D5700.scheduling
+package d5700.scheduling
 
-import D5700.cpu.CPU
-import D5700.memory.RAM
-import D5700.memory.ROM
-import D5700.strategy.RamStrategy
+import d5700.cpu.CPU
+import d5700.memory.RAM
+import d5700.memory.ROM
+import d5700.strategy.RamStrategy
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
