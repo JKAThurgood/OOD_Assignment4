@@ -75,13 +75,9 @@ class CPU {
 
         try {
             val opcode = fetchInstruction()
-            println("PC=${pc.toString(16)} OPCODE=%04X".format(opcode.toInt() and 0xFFFF))
 
             val instruction = instructionFactory.create(opcode)
             instruction.execute(this, opcode)
-
-            println("NEW PC=${pc.toString(16)}")
-
         } catch (_: IllegalStateException) {
             terminated = true
         }

@@ -12,6 +12,7 @@ class Screen private constructor() : Display {
     override fun draw(ascii: Byte, row: Int, column: Int) {
         validatePosition(row, column)
         frameBuffer[row * 8 + column] = ascii
+        render()
     }
 
     override fun render() {
@@ -20,13 +21,14 @@ class Screen private constructor() : Display {
                 val value = frameBuffer[row * 8 + col]
 
                 if (value == 0.toByte()) {
-                    print(' ')
+                    print('X')
                 } else {
                     print(value.toInt().toChar())
                 }
             }
             println()
         }
+        println("#######")
     }
 
     override fun clear() {
