@@ -4,6 +4,6 @@ import D5700.cpu.CPU
 
 class ReadKeyboardInstruction : Instruction() {
     override fun perform(cpu: CPU) {
-        cpu.registers[0] = 0
+        cpu.registers[0] = cpu.input?.readHexByte() ?: throw IllegalStateException("Input device is not set")
     }
 }

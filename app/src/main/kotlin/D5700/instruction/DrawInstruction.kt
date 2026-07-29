@@ -1,11 +1,23 @@
 package D5700.instruction
 
 import D5700.cpu.CPU
-import D5700.io.Screen
 
 class DrawInstruction : Instruction() {
+    private var charRegister = 0
+    private var row = 0
+    private var column = 0
+
+    override fun decode(opcode: Short) {
+        charRegister = (opcode.toInt() ushr 8) and 0x7
+        row = (opcode.toInt() ushr 4) and 0xF
+        column = opcode.toInt() and 0xF
+    }
+
     override fun perform(cpu: CPU) {
-        val screen = Screen.instance()
-        screen.draw(cpu.registers[0], cpu.registers[1].toInt(), cpu.registers[2].toInt())
+        cpu.display?.draw(
+            cpu.registers[charRegister],
+            row,
+            column
+        ) ?: throw IllegalStateException("Display is not set")
     }
 }

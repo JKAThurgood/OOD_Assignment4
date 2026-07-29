@@ -1,7 +1,7 @@
 package D5700.io
 
-class Keyboard {
-    fun readHexByte(): Byte {
+class Keyboard : InputDevice {
+    override fun readHexByte(): Byte {
         val input = readLine()?.trim().orEmpty()
 
         if (input.isEmpty()) {

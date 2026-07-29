@@ -8,7 +8,6 @@ import D5700.memory.ROM
 import D5700.scheduling.CpuScheduler
 import D5700.scheduling.TimerService
 import D5700.strategy.RamStrategy
-import D5700.strategy.RomStrategy
 
 class D5700Computer {
     val cpu = CPU()
@@ -20,8 +19,11 @@ class D5700Computer {
     private val timerService = TimerService(cpu)
 
     init {
+        cpu.ram = ram
         cpu.memoryStrategy = RamStrategy(ram)
         cpu.rom = rom
+        cpu.display = screen
+        cpu.input = keyboard
     }
 
     fun loadProgram(data: ByteArray) {
@@ -47,11 +49,13 @@ class D5700Computer {
     fun reset() {
         cpu.pc = 0
         cpu.address = 0
-        cpu.memoryFlag = false
         cpu.timer = 0
         cpu.registers.fill(0)
         cpu.rom = rom
+        cpu.ram = ram
         cpu.memoryStrategy = RamStrategy(ram)
+        cpu.display = screen
+        cpu.input = keyboard
         screen.clear()
     }
 }

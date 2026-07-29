@@ -40,6 +40,7 @@ application {
     mainClass = "D5700.MainKt"
 }
 
+
 tasks.named<Test>("test") {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()

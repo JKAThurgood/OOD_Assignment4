@@ -1,8 +1,14 @@
 package D5700.cpu
 
 import D5700.factory.InstructionFactory
+import D5700.io.Display
+import D5700.io.InputDevice
 import D5700.memory.MemoryDevice
+import D5700.memory.RAM
+import D5700.memory.ROM
 import D5700.strategy.MemoryStrategy
+import D5700.strategy.RamStrategy
+import D5700.strategy.RomStrategy
 
 class CPU {
     private val instructionFactory = InstructionFactory()
@@ -11,9 +17,11 @@ class CPU {
     var pc: Int = 0
     var timer: Byte = 0
     var address: Int = 0
-    var memoryFlag: Boolean = false
     var memoryStrategy: MemoryStrategy? = null
     var rom: MemoryDevice? = null
+    var ram: RAM? = null
+    var display: Display? = null
+    var input: InputDevice? = null
 
     var r0: Byte
         get() = registers[0]
@@ -64,9 +72,16 @@ class CPU {
         if (terminated) {
             return
         }
+
         try {
-            val instruction = instructionFactory.create(fetchInstruction())
-            instruction.execute(this)
+            val opcode = fetchInstruction()
+            println("PC=${pc.toString(16)} OPCODE=%04X".format(opcode.toInt() and 0xFFFF))
+
+            val instruction = instructionFactory.create(opcode)
+            instruction.execute(this, opcode)
+
+            println("NEW PC=${pc.toString(16)}")
+
         } catch (_: IllegalStateException) {
             terminated = true
         }
@@ -86,6 +101,14 @@ class CPU {
 
     fun skipInstruction() {
         pc += 4
+    }
+
+    fun switchMemory() {
+        memoryStrategy = when (memoryStrategy) {
+            is RamStrategy -> RomStrategy(rom as? ROM ?: throw IllegalStateException("ROM is not set"))
+            is RomStrategy -> RamStrategy(ram ?: throw IllegalStateException("RAM is not set"))
+            else -> RamStrategy(ram ?: throw IllegalStateException("RAM is not set"))
+        }
     }
 
     fun terminate(message: String = "Program terminated") {

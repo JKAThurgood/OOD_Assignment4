@@ -1,6 +1,6 @@
 package D5700.io
 
-class Screen private constructor() {
+class Screen private constructor() : Display {
     private val frameBuffer = ByteArray(64)
 
     companion object {
@@ -9,14 +9,27 @@ class Screen private constructor() {
         fun instance(): Screen = instance
     }
 
-    fun draw(ascii: Byte, row: Int, column: Int) {
+    override fun draw(ascii: Byte, row: Int, column: Int) {
         validatePosition(row, column)
         frameBuffer[row * 8 + column] = ascii
     }
 
-    fun render(): ByteArray = frameBuffer.copyOf()
+    override fun render() {
+        for (row in 0 until 8) {
+            for (col in 0 until 8) {
+                val value = frameBuffer[row * 8 + col]
 
-    fun clear() {
+                if (value == 0.toByte()) {
+                    print(' ')
+                } else {
+                    print(value.toInt().toChar())
+                }
+            }
+            println()
+        }
+    }
+
+    override fun clear() {
         frameBuffer.fill(0)
     }
 

@@ -4,6 +4,6 @@ import D5700.cpu.CPU
 
 class SwitchMemoryInstruction : Instruction() {
     override fun perform(cpu: CPU) {
-        cpu.memoryFlag = !cpu.memoryFlag
+        cpu.switchMemory()
     }
 }

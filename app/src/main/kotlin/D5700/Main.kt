@@ -4,33 +4,28 @@ import java.io.File
 import java.io.IOException
 
 fun main() {
-    print("Enter the path to a .d5700 program file: ")
-    System.out.flush()
+//    print("Enter the path to a .d5700 program file: ")
+//    System.out.flush()
+//
+//    val path = readln().trim()
+//
+//    if (path.isEmpty()) {
+//        println("No path provided.")
+//        return
+//    }
 
-    val path = readln().trim()
-
-    if (path.isEmpty()) {
-        println("No path provided.")
-        return
-    }
-
-    val file = File(path)
+    val file = File("/home/jaket/Documents/Summer2026/OOD/OOD_Assignment4/roms/hello.out")
     if (!file.exists() || !file.isFile) {
-        println("File not found: $path")
+//        println("File not found: $path")
         return
     }
 
-    val lines = try {
-        file.readLines().filter { it.isNotBlank() }
+    val program = try {
+        file.readBytes()
     } catch (_: IOException) {
-        println("Unable to read file: $path")
+//        println("Unable to read file: $path")
         return
     }
-
-    val program = lines.flatMap { line ->
-        val value = line.trim().toInt(16)
-        listOf((value ushr 8).toByte(), value.toByte())
-    }.toByteArray()
 
     val computer = D5700Computer()
     computer.loadProgram(program)
@@ -41,5 +36,6 @@ fun main() {
     }
 
     computer.stop()
+    computer.screen.render()
     println("Program completed.")
 }

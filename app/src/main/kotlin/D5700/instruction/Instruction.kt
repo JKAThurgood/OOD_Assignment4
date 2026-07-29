@@ -3,21 +3,21 @@ package D5700.instruction
 import D5700.cpu.CPU
 
 abstract class Instruction {
-    private var opcode: Short = 0
     private var skipTriggered = false
 
-    fun execute(cpu: CPU) {
+    fun execute(cpu: CPU, opcode: Short) {
         decode(opcode)
         validate(cpu)
         perform(cpu)
+
         if (cpu.isHalted()) {
             return
         }
+
         updateProgramCounter(cpu)
     }
 
-    protected fun decode(opcode: Short) {
-        this.opcode = opcode
+    protected open fun decode(opcode: Short) {
     }
 
     protected open fun validate(cpu: CPU) {
