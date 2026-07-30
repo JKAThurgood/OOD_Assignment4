@@ -110,22 +110,14 @@ package "Instructions" {
     ' Shadow relationships force layout spacing
     StoreInstruction -[hidden]- HaltInstruction
     HaltInstruction -[hidden]- AddInstruction
-    AddInstruction -[hidden]- SubInstruction
     SubInstruction -[hidden]- ReadInstruction
     ReadInstruction -[hidden]- WriteInstruction
 
-    WriteInstruction -[hidden]- JumpInstruction
     JumpInstruction -[hidden]- ReadKeyboardInstruction
-    ReadKeyboardInstruction -[hidden]- SwitchMemoryInstruction
 
     SwitchMemoryInstruction -[hidden]- SkipEqualInstruction
-    SkipEqualInstruction -[hidden]- SkipNotEqualInstruction
     SkipNotEqualInstruction -[hidden]- SetAInstruction
     SetAInstruction -[hidden]- SetTInstruction
-
-    SetTInstruction -[hidden]- ReadTInstruction
-    ReadTInstruction -[hidden]- ConvertBase10Instruction
-    ConvertBase10Instruction -[hidden]- ConvertAsciiInstruction
     ConvertAsciiInstruction -[hidden]- DrawInstruction
 }
 
