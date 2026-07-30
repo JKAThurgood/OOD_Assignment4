@@ -10,7 +10,6 @@ class WriteInstruction : Instruction() {
     }
 
     override fun perform(cpu: CPU) {
-        cpu.getMemoryStrategy()?.write(cpu, cpu.getRegister(sourceRegister))
-            ?: throw IllegalStateException("Memory strategy not set")
+        cpu.writeMemory(cpu.readRegister(sourceRegister))
     }
 }

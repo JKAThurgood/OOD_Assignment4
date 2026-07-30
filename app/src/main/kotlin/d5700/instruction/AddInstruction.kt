@@ -14,10 +14,11 @@ class AddInstruction : Instruction() {
     }
 
     override fun perform(cpu: CPU) {
-        val result =
-            (cpu.getRegister(sourceRegisterX) +
-                    cpu.getRegister(sourceRegisterY)).toByte()
+        val result = (
+                cpu.readRegister(sourceRegisterX).toInt() +
+                        cpu.readRegister(sourceRegisterY).toInt()
+                ).toByte()
 
-        cpu.setRegister(destinationRegister, result)
+        cpu.writeRegister(destinationRegister, result)
     }
 }

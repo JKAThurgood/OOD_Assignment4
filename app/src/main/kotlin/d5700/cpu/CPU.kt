@@ -66,38 +66,70 @@ class CPU {
 
     private var terminated = false
 
-    fun getRegister(index: Int): Byte = registers[index]
+    fun readRegister(index: Int): Byte {
+        require(index in registers.indices)
+        return registers[index]
+    }
 
-    fun setRegister(index: Int, value: Byte) {
+    fun writeRegister(index: Int, value: Byte) {
+        require(index in registers.indices)
         registers[index] = value
     }
 
     fun getProgramCounter(): Int = pc
 
-    fun setProgramCounter(value: Int) {
-        pc = value
+    fun jumpTo(address: Int) {
+        require(address % 2 == 0) {
+            "Program counter must be even"
+        }
+        pc = address
     }
 
-    fun advanceProgramCounter(amount: Int) {
-        pc += amount
+    fun incrementPC() {
+        pc += 2
     }
 
-    fun getTimer(): Byte = timer
-
-    fun setTimer(value: Int) {
-        timer = value.toByte()
+    fun skipInstruction() {
+        pc += 4
     }
+
+    fun setTimer(value: Byte) {
+        timer = value
+    }
+
+    fun decrementTimer() {
+        if (timer > 0) {
+            timer--
+        }
+    }
+
+    fun readTimer(): Byte = timer
 
     fun getAddress(): Int = address
 
-    fun setAddress(value: Int) {
+    fun loadAddress(value: Int) {
+        require(value in 0..4095) {
+            "Address must be between 0 and 4095"
+        }
         address = value
     }
 
-    fun getMemoryStrategy(): MemoryStrategy? = memoryStrategy
+    fun hasMemory(): Boolean {
+        return memoryStrategy != null
+    }
 
     fun setMemoryStrategy(strategy: MemoryStrategy?) {
         memoryStrategy = strategy
+    }
+
+    fun readMemory(): Byte {
+        return memoryStrategy?.read(this)
+            ?: throw IllegalStateException("Memory strategy not set")
+    }
+
+    fun writeMemory(value: Byte) {
+        memoryStrategy?.write(this, value)
+            ?: throw IllegalStateException("Memory strategy not set")
     }
 
     fun getRom(): MemoryDevice? = rom
@@ -160,14 +192,6 @@ class CPU {
         val firstByte = programMemory.read(pc).toInt() and 0xFF
         val secondByte = programMemory.read(pc + 1).toInt() and 0xFF
         return ((firstByte shl 8) or secondByte).toShort()
-    }
-
-    fun incrementPC() {
-        pc += 2
-    }
-
-    fun skipInstruction() {
-        pc += 4
     }
 
     fun switchMemory() {

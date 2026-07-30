@@ -33,9 +33,9 @@ class TimerService(private val cpu: CPU) {
     }
 
     fun tick() {
-        val current = cpu.getTimer().toInt()
+        val current = cpu.readTimer().toInt()
         if (current > 0) {
-            cpu.setTimer(current - 1)
+            cpu.setTimer((current - 1).toByte())
         }
     }
 }

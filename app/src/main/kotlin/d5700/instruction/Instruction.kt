@@ -19,13 +19,13 @@ abstract class Instruction {
     open fun decode(opcode: Short) {
     }
 
-    protected open fun validate(cpu: CPU) {
-        if (this !is JumpInstruction) {
-            require(cpu.getMemoryStrategy() != null) {
-                "CPU memory strategy must be set"
-            }
+protected open fun validate(cpu: CPU) {
+    if (this !is JumpInstruction) {
+        require(cpu.hasMemory()) {
+            "CPU memory strategy must be set"
         }
     }
+}
 
     protected abstract fun perform(cpu: CPU)
 
@@ -44,12 +44,10 @@ abstract class Instruction {
             return
         }
 
-        if (shouldIncrementPC()) {
-            if (skipTriggered) {
-                cpu.advanceProgramCounter(4)
-            } else {
-                cpu.advanceProgramCounter(incrementAmount())
-            }
+        if (skipTriggered) {
+            cpu.skipInstruction()
+        } else {
+            cpu.incrementPC()
         }
     }
 }

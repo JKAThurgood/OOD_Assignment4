@@ -8,7 +8,7 @@ package "Facade" {
         +cpu : CPU
         +ram : RAM
         +rom : ROM
-        +screen : Screen
+        +display : Display
         +keyboard : Keyboard
         -cpuScheduler : CpuScheduler
         -timerService : TimerService
@@ -34,11 +34,15 @@ package "CPU" {
         +input : InputDevice?
         -terminated : Boolean
 
-        +isHalted() : Boolean
-        +cycle()
-        +fetchInstruction() : Short
+        +jumpTo(address:Int)
         +incrementPC()
-        +skipInstruction()
+        +skipNextInstruction()
+        +loadAddress(address:Int)
+        +readRegister(index:Int):Byte
+        +writeRegister(index:Int,value:Byte)
+        +readMemory():Byte
+        +writeMemory(value:Byte)
+        +decrementTimer()
         +switchMemory()
         +terminate(msg:String)
     }
@@ -90,22 +94,6 @@ package "Instructions" {
     Instruction <|-- ConvertBase10Instruction
     Instruction <|-- ConvertAsciiInstruction
     Instruction <|-- DrawInstruction
-
-    StoreInstruction -[hidden]- AddInstruction
-    AddInstruction -[hidden]- SubInstruction
-    SubInstruction -[hidden]- ReadInstruction
-
-    WriteInstruction -[hidden]- JumpInstruction
-    JumpInstruction -[hidden]- ReadKeyboardInstruction
-    ReadKeyboardInstruction -[hidden]- SwitchMemoryInstruction
-
-    SkipEqualInstruction -[hidden]- SkipNotEqualInstruction
-    SkipNotEqualInstruction -[hidden]- SetAInstruction
-    SetAInstruction -[hidden]- SetTInstruction
-
-    ReadTInstruction -[hidden]- ConvertBase10Instruction
-    ConvertBase10Instruction -[hidden]- ConvertAsciiInstruction
-    ConvertAsciiInstruction -[hidden]- DrawInstruction
 }
 
 package "Factory" {
@@ -153,18 +141,19 @@ package "IO" {
 
     interface Display {
         +draw(ascii:Byte,row:Int,col:Int)
-        +render() : ByteArray
+        +render()
         +clear()
     }
 
-    class Screen <<Singleton>> {
+    class Screen {
         -frameBuffer : Byte[64]
 
-        +instance() : Screen
         +draw(ascii:Byte,row:Int,col:Int)
-        +render() : ByteArray
+        +render()
         +clear()
     }
+
+    Display <|.. Screen
 
     interface InputDevice {
         +readHexByte() : Byte
@@ -173,6 +162,8 @@ package "IO" {
     class Keyboard {
         +readHexByte() : Byte
     }
+
+    InputDevice <|.. Keyboard
 }
 
 package "Scheduling" {
@@ -196,7 +187,7 @@ package "Scheduling" {
 D5700Computer *-- CPU
 D5700Computer *-- RAM
 D5700Computer *-- ROM
-D5700Computer *-- Screen
+D5700Computer --> Display
 D5700Computer *-- Keyboard
 D5700Computer *-- CpuScheduler
 D5700Computer *-- TimerService
@@ -215,6 +206,6 @@ RomStrategy --> ROM
 CpuScheduler --> CPU
 TimerService --> CPU
 
-DrawInstruction ..> Screen
+DrawInstruction ..> Display
 
 @enduml

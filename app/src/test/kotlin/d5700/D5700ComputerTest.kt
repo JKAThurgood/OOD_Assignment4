@@ -33,26 +33,26 @@ class D5700ComputerTest {
         val display = FakeDisplay()
         val computer = D5700Computer(display = display)
 
-        computer.cpu.setRegister(0, 0x7F.toByte())
+        computer.cpu.writeRegister(0, 0x7F.toByte())
         computer.reset()
 
-        assertEquals(0, computer.cpu.getRegister(0).toInt())
+        assertEquals(0, computer.cpu.readRegister(0).toInt())
         assertArrayEquals(ByteArray(64), display.render())
     }
 
     @Test
     fun resetClearsCpuAndScreenState() {
         val computer = D5700Computer()
-        computer.cpu.setRegister(0, 0x7F.toByte())
-        computer.cpu.setProgramCounter(4)
+        computer.cpu.writeRegister(0, 0x7F.toByte())
+        computer.cpu.skipInstruction()
         computer.cpu.setTimer(9)
         computer.screen.draw(0x41.toByte(), 0, 0)
 
         computer.reset()
 
         assertEquals(0, computer.cpu.getProgramCounter())
-        assertEquals(0, computer.cpu.getTimer().toInt())
-        assertEquals(0, computer.cpu.getRegister(0).toInt())
+        assertEquals(0, computer.cpu.readTimer().toInt())
+        assertEquals(0, computer.cpu.readRegister(0).toInt())
         assertArrayEquals(ByteArray(64), computer.screen.render())
     }
 

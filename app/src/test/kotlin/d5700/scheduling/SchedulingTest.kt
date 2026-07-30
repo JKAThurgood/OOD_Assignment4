@@ -16,7 +16,7 @@ class SchedulingTest {
 
         val cpu = CPU().apply {
             setRom(rom)
-            setProgramCounter(0)
+            jumpTo(0)
             setMemoryStrategy(RamStrategy(RAM()))
         }
 
@@ -41,6 +41,6 @@ class SchedulingTest {
         Thread.sleep(120)
         timerService.stop()
 
-        assertTrue(cpu.getTimer() < 5, "Timer service should decrement the CPU timer register")
+        assertTrue(cpu.readTimer() < 5, "Timer service should decrement the CPU timer register")
     }
 }

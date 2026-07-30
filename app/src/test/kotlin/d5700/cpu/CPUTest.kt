@@ -3,13 +3,12 @@ package d5700.cpu
 import d5700.memory.RAM
 import d5700.memory.ROM
 import d5700.strategy.RamStrategy
-import d5700.strategy.RomStrategy
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.function.Executable
 
 class CPUTest {
+
     @Test
     fun fetchInstructionReadsTwoBytesFromRom() {
         val rom = ROM(writable = true)
@@ -18,7 +17,7 @@ class CPUTest {
 
         val cpu = CPU().apply {
             setRom(rom)
-            setProgramCounter(0)
+            jumpTo(0)
         }
 
         assertEquals(0x1000.toShort(), cpu.fetchInstruction())
@@ -26,7 +25,9 @@ class CPUTest {
 
     @Test
     fun incrementAndSkipAdjustProgramCounter() {
-        val cpu = CPU().apply { setProgramCounter(4) }
+        val cpu = CPU().apply {
+            jumpTo(4)
+        }
 
         cpu.incrementPC()
         assertEquals(6, cpu.getProgramCounter())
@@ -36,15 +37,25 @@ class CPUTest {
     }
 
     @Test
+    fun jumpToRejectsOddProgramCounter() {
+        val cpu = CPU()
+
+        assertThrows(IllegalArgumentException::class.java) {
+            cpu.jumpTo(3)
+        }
+    }
+
+    @Test
     fun cycleExecutesInstructionFromRom() {
         val rom = ROM(writable = true)
         rom.write(0, 0x10.toByte())
         rom.write(1, 0x00.toByte())
 
+        val ram = RAM()
+
         val cpu = CPU().apply {
-            setRom(rom)
-            setProgramCounter(0)
-            setMemoryStrategy(RamStrategy(RAM()))
+            attachDevices(ram, rom, null, null)
+            jumpTo(0)
         }
 
         cpu.cycle()
@@ -56,10 +67,11 @@ class CPUTest {
     fun terminateStopsExecution() {
         val cpu = CPU()
 
-        val exception = assertThrows(IllegalStateException::class.java, Executable {
+        val exception = assertThrows(IllegalStateException::class.java) {
             cpu.terminate("done")
-        })
+        }
 
         assertEquals("done", exception.message)
+        assertEquals(true, cpu.isHalted())
     }
 }

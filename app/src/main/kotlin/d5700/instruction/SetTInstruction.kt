@@ -10,6 +10,6 @@ class SetTInstruction : Instruction() {
     }
 
     override fun perform(cpu: CPU) {
-        cpu.setTimer(value)
+        cpu.setTimer(value.toByte())
     }
 }

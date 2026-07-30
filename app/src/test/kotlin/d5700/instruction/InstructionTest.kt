@@ -8,10 +8,11 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class InstructionTest {
+
     @Test
     fun normalInstructionsAdvanceProgramCounterByTwo() {
         val cpu = CPU().apply {
-            setProgramCounter(0)
+            jumpTo(0)
             setMemoryStrategy(RamStrategy(RAM()))
         }
 
@@ -23,7 +24,7 @@ class InstructionTest {
     @Test
     fun jumpInstructionDoesNotAdvanceProgramCounter() {
         val cpu = CPU().apply {
-            setProgramCounter(10)
+            jumpTo(10)
             setMemoryStrategy(RamStrategy(RAM()))
         }
 
@@ -37,9 +38,9 @@ class InstructionTest {
     @Test
     fun skipInstructionUsesFourStepIncrement() {
         val cpu = CPU().apply {
-            setProgramCounter(4)
-            setRegister(0, 1)
-            setRegister(1, 1)
+            jumpTo(4)
+            writeRegister(0, 1)
+            writeRegister(1, 1)
             setMemoryStrategy(RamStrategy(RAM()))
         }
 

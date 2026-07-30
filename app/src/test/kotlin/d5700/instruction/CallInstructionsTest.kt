@@ -5,7 +5,6 @@ import d5700.factory.InstructionFactory
 import d5700.io.Screen
 import d5700.memory.RAM
 import d5700.memory.ROM
-import d5700.strategy.RamStrategy
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -17,7 +16,6 @@ class CallInstructionTest {
     private fun cpuWithRam(): CPU {
         return CPU().apply {
             attachDevices(RAM(), null, null, null)
-            setMemoryStrategy(RamStrategy(getRam()!!))
         }
     }
 
@@ -28,52 +26,50 @@ class CallInstructionTest {
     @Test
     fun addInstructionAddsRegisters() {
         val cpu = cpuWithRam()
-        cpu.setRegister(0, 10)
-        cpu.setRegister(1, 5)
+        cpu.writeRegister(0, 10)
+        cpu.writeRegister(1, 5)
 
         execute(cpu, 0x1010)
 
-        assertEquals(15, cpu.getRegister(0))
+        assertEquals(15, cpu.readRegister(0))
     }
 
     @Test
     fun subInstructionSubtractsRegisters() {
         val cpu = cpuWithRam()
-        cpu.setRegister(0, 10)
-        cpu.setRegister(1, 3)
+        cpu.writeRegister(0, 10)
+        cpu.writeRegister(1, 3)
 
         execute(cpu, 0x2010)
 
-        assertEquals(7, cpu.getRegister(0))
+        assertEquals(7, cpu.readRegister(0))
     }
 
     @Test
     fun storeInstructionStoresImmediateValueInRegister() {
         val cpu = cpuWithRam()
-        cpu.setAddress(20)
-        cpu.setRegister(0, 55)
 
         execute(cpu, 0x0010)
 
-        assertEquals(16.toByte(), cpu.getRegister(0))
+        assertEquals(16.toByte(), cpu.readRegister(0))
     }
 
     @Test
     fun readInstructionReadsMemory() {
         val cpu = cpuWithRam()
-        cpu.setAddress(20)
+        cpu.loadAddress(20)
         cpu.getRam()!!.write(20, 42)
 
         execute(cpu, 0x3000)
 
-        assertEquals(42, cpu.getRegister(0))
+        assertEquals(42, cpu.readRegister(0))
     }
 
     @Test
     fun writeInstructionWritesRegisterToMemory() {
         val cpu = cpuWithRam()
-        cpu.setAddress(20)
-        cpu.setRegister(0, 99)
+        cpu.loadAddress(20)
+        cpu.writeRegister(0, 99)
 
         execute(cpu, 0x4000)
 
@@ -83,9 +79,8 @@ class CallInstructionTest {
     @Test
     fun jumpInstructionSetsProgramCounter() {
         val cpu = cpuWithRam()
-        cpu.setProgramCounter(20)
 
-        execute(cpu, 0x5064) // jump to address 100 (0x64)
+        execute(cpu, 0x5064) // jump to 100 (0x064)
 
         assertEquals(100, cpu.getProgramCounter())
     }
@@ -95,19 +90,19 @@ class CallInstructionTest {
         val cpu = cpuWithRam()
         cpu.setRom(ROM(writable = true))
 
-        val before = cpu.getMemoryStrategy()
+        assertTrue(cpu.hasMemory())
 
-        execute(cpu, 0x7000)
+        cpu.switchMemory()
 
-        assertTrue(cpu.getMemoryStrategy() !== before)
+        assertTrue(cpu.hasMemory())
     }
 
     @Test
     fun skipEqualSkipsInstruction() {
         val cpu = cpuWithRam()
-        cpu.setProgramCounter(10)
-        cpu.setRegister(0, 5)
-        cpu.setRegister(1, 5)
+        cpu.jumpTo(10)
+        cpu.writeRegister(0, 5)
+        cpu.writeRegister(1, 5)
 
         execute(cpu, 0x8010)
 
@@ -117,9 +112,9 @@ class CallInstructionTest {
     @Test
     fun skipNotEqualSkipsInstruction() {
         val cpu = cpuWithRam()
-        cpu.setProgramCounter(10)
-        cpu.setRegister(0, 5)
-        cpu.setRegister(1, 6)
+        cpu.jumpTo(10)
+        cpu.writeRegister(0, 5)
+        cpu.writeRegister(1, 6)
 
         execute(cpu, 0x9010)
 
@@ -130,7 +125,7 @@ class CallInstructionTest {
     fun setAStoresAddress() {
         val cpu = cpuWithRam()
 
-        execute(cpu, 0xA032) // A = 50
+        execute(cpu, 0xA032)
 
         assertEquals(50, cpu.getAddress())
     }
@@ -138,28 +133,27 @@ class CallInstructionTest {
     @Test
     fun setTStoresTimer() {
         val cpu = cpuWithRam()
-        cpu.setRegister(0, 25)
 
         execute(cpu, 0xB190)
 
-        assertEquals(25.toByte(), cpu.getTimer())
+        assertEquals(25.toByte(), cpu.readTimer())
     }
 
     @Test
     fun readTReadsTimer() {
         val cpu = cpuWithRam()
-        cpu.setTimer(33)
+        cpu.setTimer(33.toByte())
 
         execute(cpu, 0xC000)
 
-        assertEquals(33, cpu.getRegister(0))
+        assertEquals(33.toByte(), cpu.readRegister(0))
     }
 
     @Test
     fun convertBase10StoresDigits() {
         val cpu = cpuWithRam()
-        cpu.setAddress(50)
-        cpu.setRegister(0, 253.toByte())
+        cpu.loadAddress(50)
+        cpu.writeRegister(0, 253.toByte())
 
         execute(cpu, 0xD000)
 
@@ -169,13 +163,23 @@ class CallInstructionTest {
     }
 
     @Test
-    fun convertAsciiConvertsHexDigit() {
+    fun convertAsciiConvertsDecimalDigit() {
         val cpu = cpuWithRam()
-        cpu.setRegister(0, 10)
+        cpu.writeRegister(0, 5)
 
         execute(cpu, 0xE010)
 
-        assertEquals('A'.code.toByte(), cpu.getRegister(1))
+        assertEquals('5'.code.toByte(), cpu.readRegister(1))
+    }
+
+    @Test
+    fun convertAsciiConvertsHexLetter() {
+        val cpu = cpuWithRam()
+        cpu.writeRegister(0, 10)
+
+        execute(cpu, 0xE010)
+
+        assertEquals('A'.code.toByte(), cpu.readRegister(1))
     }
 
     @Test
@@ -186,9 +190,9 @@ class CallInstructionTest {
         screen.clear()
 
         cpu.setDisplay(screen)
-        cpu.setRegister(0, 'X'.code.toByte())
-        cpu.setRegister(1, 2)
-        cpu.setRegister(2, 3)
+        cpu.writeRegister(0, 'X'.code.toByte())
+        cpu.writeRegister(1, 2)
+        cpu.writeRegister(2, 3)
 
         execute(cpu, 0xF023)
 

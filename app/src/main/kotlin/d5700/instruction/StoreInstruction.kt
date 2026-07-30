@@ -12,6 +12,6 @@ class StoreInstruction : Instruction() {
     }
 
     override fun perform(cpu: CPU) {
-        cpu.setRegister(register, value)
+        cpu.writeRegister(register, value)
     }
 }

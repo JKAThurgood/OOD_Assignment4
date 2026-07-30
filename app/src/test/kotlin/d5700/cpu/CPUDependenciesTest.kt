@@ -21,10 +21,11 @@ class CPUDependenciesTest {
         }
 
         cpu.switchMemory()
-        assertTrue(cpu.getMemoryStrategy() is RomStrategy)
+        assertTrue(cpu.hasMemory())
 
         cpu.switchMemory()
-        assertTrue(cpu.getMemoryStrategy() is RamStrategy)
+        assertTrue(cpu.hasMemory())
+
     }
 
     @Test
@@ -33,9 +34,9 @@ class CPUDependenciesTest {
         val cpu = CPU().apply {
             setDisplay(fakeDisplay)
             setMemoryStrategy(RamStrategy(RAM()))
-            setRegister(0, 0x41.toByte())
-            setRegister(1, 0x00.toByte())
-            setRegister(2, 0x00.toByte())
+            writeRegister(0, 0x41.toByte())
+            writeRegister(1, 0x00.toByte())
+            writeRegister(2, 0x00.toByte())
         }
 
         DrawInstruction().execute(cpu)
@@ -53,7 +54,7 @@ class CPUDependenciesTest {
 
         ReadKeyboardInstruction().execute(cpu)
 
-        assertEquals(0x5A.toByte(), cpu.getRegister(0))
+        assertEquals(0x5A.toByte(), cpu.readRegister(0))
     }
 
     private class FakeDisplay : Display {

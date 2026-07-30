@@ -4,13 +4,13 @@ import d5700.cpu.CPU
 
 class SetAInstruction : Instruction() {
 
-    private var addressValue = 0
+    private var address = 0
 
     override fun decode(opcode: Short) {
-        addressValue = opcode.toInt() and 0xFFF
+        address = opcode.toInt() and 0x0FFF
     }
 
     override fun perform(cpu: CPU) {
-        cpu.setAddress(addressValue)
+        cpu.loadAddress(address)
     }
 }

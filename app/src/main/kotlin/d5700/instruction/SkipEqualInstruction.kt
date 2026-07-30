@@ -12,7 +12,7 @@ class SkipEqualInstruction : Instruction() {
     }
 
     override fun perform(cpu: CPU) {
-        if (cpu.getRegister(registerX) == cpu.getRegister(registerY)) {
+        if (cpu.readRegister(registerX) == cpu.readRegister(registerY)) {
             markSkip()
         }
     }

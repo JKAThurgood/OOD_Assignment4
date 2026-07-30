@@ -10,7 +10,7 @@ fun main() {
     val path = ""
 
 
-    val file = File("/home/jaket/Documents/Summer2026/OOD/OOD_Assignment4/roms/timer.out")
+    val file = File("/home/jaket/Documents/Summer2026/OOD/OOD_Assignment4/roms/keyboard.out")
     if (!file.exists() || !file.isFile) {
         println("File not found: $path")
         return

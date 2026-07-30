@@ -12,18 +12,18 @@ class ConvertAsciiInstruction : Instruction() {
     }
 
     override fun perform(cpu: CPU) {
-        val value = cpu.getRegister(sourceRegister).toInt() and 0xFF
+        val value = cpu.readRegister(sourceRegister).toInt() and 0xFF
 
         require(value <= 0xF) {
             "Value must be a hexadecimal digit"
         }
 
-        cpu.setRegister(
-            destinationRegister, when (value) {
-                in 0..9 -> ('0'.code + value).toByte()
-                in 10..15 -> ('A'.code + (value - 10)).toByte()
-                else -> throw IllegalStateException("Invalid hexadecimal digit")
-            }
-        )
+        val ascii = when (value) {
+            in 0..9 -> ('0'.code + value).toByte()
+            in 10..15 -> ('A'.code + (value - 10)).toByte()
+            else -> throw IllegalStateException("Invalid hexadecimal digit")
+        }
+
+        cpu.writeRegister(destinationRegister, ascii)
     }
 }
