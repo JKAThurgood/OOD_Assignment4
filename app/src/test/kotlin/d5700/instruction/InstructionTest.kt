@@ -3,17 +3,21 @@ package d5700.instruction
 import d5700.cpu.CPU
 import d5700.factory.InstructionFactory
 import d5700.memory.RAM
-import d5700.strategy.RamStrategy
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class InstructionTest {
 
+    private fun cpuWithRam(): CPU {
+        return CPU().apply {
+            attachDevices(RAM(), null, null, null)
+        }
+    }
+
     @Test
     fun normalInstructionsAdvanceProgramCounterByTwo() {
-        val cpu = CPU().apply {
+        val cpu = cpuWithRam().apply {
             jumpTo(0)
-            setMemoryStrategy(RamStrategy(RAM()))
         }
 
         AddInstruction().execute(cpu)
@@ -23,9 +27,8 @@ class InstructionTest {
 
     @Test
     fun jumpInstructionDoesNotAdvanceProgramCounter() {
-        val cpu = CPU().apply {
+        val cpu = cpuWithRam().apply {
             jumpTo(10)
-            setMemoryStrategy(RamStrategy(RAM()))
         }
 
         InstructionFactory()
@@ -37,11 +40,10 @@ class InstructionTest {
 
     @Test
     fun skipInstructionUsesFourStepIncrement() {
-        val cpu = CPU().apply {
+        val cpu = cpuWithRam().apply {
             jumpTo(4)
             writeRegister(0, 1)
             writeRegister(1, 1)
-            setMemoryStrategy(RamStrategy(RAM()))
         }
 
         SkipEqualInstruction().execute(cpu)

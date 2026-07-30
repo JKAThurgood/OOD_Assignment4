@@ -14,10 +14,6 @@ class DrawInstruction : Instruction() {
     }
 
     override fun perform(cpu: CPU) {
-        cpu.getDisplay()?.draw(
-            cpu.readRegister(charRegister),
-            row,
-            column
-        ) ?: throw IllegalStateException("Display is not set")
+        cpu.drawRegister(charRegister, row, column)
     }
 }

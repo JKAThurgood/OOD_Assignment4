@@ -15,7 +15,7 @@ class CallInstructionTest {
 
     private fun cpuWithRam(): CPU {
         return CPU().apply {
-            attachDevices(RAM(), null, null, null)
+            attachDevices(RAM(), ROM(writable = true), null, null)
         }
     }
 
@@ -80,7 +80,7 @@ class CallInstructionTest {
     fun jumpInstructionSetsProgramCounter() {
         val cpu = cpuWithRam()
 
-        execute(cpu, 0x5064) // jump to 100 (0x064)
+        execute(cpu, 0x5064)
 
         assertEquals(100, cpu.getProgramCounter())
     }
@@ -88,7 +88,6 @@ class CallInstructionTest {
     @Test
     fun switchMemoryChangesMemoryStrategy() {
         val cpu = cpuWithRam()
-        cpu.setRom(ROM(writable = true))
 
         assertTrue(cpu.hasMemory())
 
@@ -189,7 +188,7 @@ class CallInstructionTest {
 
         screen.clear()
 
-        cpu.setDisplay(screen)
+        cpu.attachDevices(cpu.getRam(), cpu.getRom(), screen, null)
         cpu.writeRegister(0, 'X'.code.toByte())
         cpu.writeRegister(1, 2)
         cpu.writeRegister(2, 3)

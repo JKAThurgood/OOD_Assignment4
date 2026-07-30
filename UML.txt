@@ -23,26 +23,31 @@ package "Facade" {
 package "CPU" {
 
     class CPU {
-        +registers : Byte[8]
-        +pc : Int
-        +timer : Byte
-        +address : Int
-        +memoryStrategy : MemoryStrategy?
-        +rom : MemoryDevice?
-        +ram : RAM?
-        +display : Display?
-        +input : InputDevice?
+        -registers : Byte[8]
+        -pc : Int
+        -timer : Byte
+        -address : Int
+        -memoryStrategy : MemoryStrategy?
+        -rom : MemoryDevice?
+        -ram : RAM?
+        -display : Display?
+        -input : InputDevice?
         -terminated : Boolean
 
+        +readRegister(index:Int) : Byte
+        +writeRegister(index:Int,value:Byte)
         +jumpTo(address:Int)
         +incrementPC()
-        +skipNextInstruction()
-        +loadAddress(address:Int)
-        +readRegister(index:Int):Byte
-        +writeRegister(index:Int,value:Byte)
-        +readMemory():Byte
+        +skipInstruction()
+        +loadAddress(value:Int)
+        +readMemory() : Byte
         +writeMemory(value:Byte)
         +decrementTimer()
+        +readTimer() : Byte
+        +drawRegister(registerIndex:Int,row:Int,column:Int)
+        +readInputInto(registerIndex:Int)
+        +cycle()
+        +fetchInstruction() : Short
         +switchMemory()
         +terminate(msg:String)
     }

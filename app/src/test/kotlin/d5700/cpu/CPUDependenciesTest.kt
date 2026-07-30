@@ -6,18 +6,21 @@ import d5700.io.Display
 import d5700.io.InputDevice
 import d5700.memory.RAM
 import d5700.memory.ROM
-import d5700.strategy.RamStrategy
-import d5700.strategy.RomStrategy
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class CPUDependenciesTest {
+
     @Test
     fun switchMemoryTogglesBetweenRamAndRomStrategies() {
         val cpu = CPU().apply {
-            attachDevices(RAM(), ROM(writable = true), null, null)
-            setMemoryStrategy(RamStrategy(getRam()!!))
+            attachDevices(
+                RAM(),
+                ROM(writable = true),
+                null,
+                null
+            )
         }
 
         cpu.switchMemory()
@@ -25,18 +28,23 @@ class CPUDependenciesTest {
 
         cpu.switchMemory()
         assertTrue(cpu.hasMemory())
-
     }
 
     @Test
     fun drawInstructionUsesInjectedDisplay() {
         val fakeDisplay = FakeDisplay()
+
         val cpu = CPU().apply {
-            setDisplay(fakeDisplay)
-            setMemoryStrategy(RamStrategy(RAM()))
+            attachDevices(
+                RAM(),
+                null,
+                fakeDisplay,
+                null
+            )
+
             writeRegister(0, 0x41.toByte())
-            writeRegister(1, 0x00.toByte())
-            writeRegister(2, 0x00.toByte())
+            writeRegister(1, 0)
+            writeRegister(2, 0)
         }
 
         DrawInstruction().execute(cpu)
@@ -47,32 +55,39 @@ class CPUDependenciesTest {
     @Test
     fun readKeyboardInstructionUsesInjectedInput() {
         val fakeInput = FakeInputDevice(0x5A.toByte())
+
         val cpu = CPU().apply {
-            setInput(fakeInput)
-            setMemoryStrategy(RamStrategy(RAM()))
+            attachDevices(
+                RAM(),
+                null,
+                null,
+                fakeInput
+            )
         }
 
         ReadKeyboardInstruction().execute(cpu)
 
-        assertEquals(0x5A.toByte(), cpu.readRegister(0))
+        assertEquals(
+            0x5A.toByte(),
+            cpu.readRegister(0)
+        )
     }
 
     private class FakeDisplay : Display {
         var lastAscii: Byte? = null
-        var lastRow: Int? = null
-        var lastColumn: Int? = null
 
         override fun draw(ascii: Byte, row: Int, column: Int) {
             lastAscii = ascii
-            lastRow = row
-            lastColumn = column
         }
 
         override fun render(): ByteArray = ByteArray(64)
+
         override fun clear() = Unit
     }
 
-    private class FakeInputDevice(private val value: Byte) : InputDevice {
+    private class FakeInputDevice(
+        private val value: Byte
+    ) : InputDevice {
         override fun readHexByte(): Byte = value
     }
 }

@@ -7,10 +7,15 @@ fun main() {
     print("Enter the path to ROM: ")
     System.out.flush()
 
-    val path = ""
+    val path = readln().trim()
+
+    if (path.isEmpty()) {
+        println("No path provided.")
+        return
+    }
 
 
-    val file = File("/home/jaket/Documents/Summer2026/OOD/OOD_Assignment4/roms/keyboard.out")
+    val file = File(path)
     if (!file.exists() || !file.isFile) {
         println("File not found: $path")
         return

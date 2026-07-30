@@ -7,11 +7,12 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class MemoryStrategyTest {
+
     @Test
     fun ramStrategyUsesCpuAddressRegister() {
         val ram = RAM()
         val cpu = CPU().apply {
-            setMemoryStrategy(RamStrategy(ram))
+            attachDevices(ram, null, null, null)
             loadAddress(20)
         }
 
@@ -22,11 +23,16 @@ class MemoryStrategyTest {
 
     @Test
     fun romStrategyUsesCpuAddressRegister() {
-        val cpu = CPU().apply { jumpTo(20) }
         val rom = ROM(writable = true)
+        val cpu = CPU().apply {
+            attachDevices(null, rom, null, null)
+            loadAddress(20)
+        }
+
         val strategy = RomStrategy(rom)
 
         strategy.write(cpu, 9)
+
         assertEquals(9, strategy.read(cpu).toInt())
     }
 }

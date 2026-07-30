@@ -16,7 +16,12 @@ class CPUTest {
         rom.write(1, 0x00.toByte())
 
         val cpu = CPU().apply {
-            setRom(rom)
+            attachDevices(
+                null,
+                rom,
+                null,
+                null
+            )
             jumpTo(0)
         }
 

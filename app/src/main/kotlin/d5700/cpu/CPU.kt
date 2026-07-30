@@ -118,10 +118,6 @@ class CPU {
         return memoryStrategy != null
     }
 
-    fun setMemoryStrategy(strategy: MemoryStrategy?) {
-        memoryStrategy = strategy
-    }
-
     fun readMemory(): Byte {
         return memoryStrategy?.read(this)
             ?: throw IllegalStateException("Memory strategy not set")
@@ -134,27 +130,14 @@ class CPU {
 
     fun getRom(): MemoryDevice? = rom
 
-    fun setRom(rom: MemoryDevice?) {
-        this.rom = rom
-    }
-
     fun getRam(): RAM? = ram
 
-    fun setRam(ram: RAM?) {
-        this.ram = ram
-    }
 
     fun getDisplay(): Display? = display
 
-    fun setDisplay(display: Display?) {
-        this.display = display
-    }
 
     fun getInput(): InputDevice? = input
 
-    fun setInput(input: InputDevice?) {
-        this.input = input
-    }
 
     fun attachDevices(ram: RAM?, rom: MemoryDevice?, display: Display?, input: InputDevice?) {
         this.ram = ram
@@ -205,5 +188,20 @@ class CPU {
     fun terminate(message: String = "Program terminated") {
         terminated = true
         throw IllegalStateException(message)
+    }
+
+    fun drawRegister(registerIndex: Int, row: Int, column: Int) {
+        display?.draw(
+            readRegister(registerIndex),
+            row,
+            column
+        ) ?: throw IllegalStateException("Display is not set")
+    }
+
+    fun readInputInto(registerIndex: Int) {
+        val value = input?.readHexByte()
+            ?: throw IllegalStateException("Input device is not set")
+
+        writeRegister(registerIndex, value)
     }
 }
