@@ -27,9 +27,8 @@ package "CPU" {
         -pc : Int
         -timer : Byte
         -address : Int
-        -memoryStrategy : MemoryStrategy?
+        -memoryController : MemoryController
         -rom : MemoryDevice?
-        -ram : RAM?
         -display : Display?
         -input : InputDevice?
         -terminated : Boolean
@@ -104,7 +103,9 @@ package "Instructions" {
 package "Factory" {
 
     class InstructionFactory <<Factory>> {
+        -creators : Map<Int, () -> Instruction>
         +create(opcode:Short) : Instruction
+        -registerInstructions()
     }
 }
 
@@ -122,6 +123,18 @@ package "Memory" {
     class ROM {
         -data : Byte[4096]
         -writable : Boolean
+    }
+
+    class MemoryController {
+        -ram : MemoryDevice?
+        -rom : MemoryDevice?
+        -strategy : MemoryStrategy?
+
+        +read(cpu:CPU) : Byte
+        +write(cpu:CPU,value:Byte)
+        +switchMode()
+        +reset()
+        +hasMemory() : Boolean
     }
 
     MemoryDevice <|.. RAM
@@ -197,20 +210,24 @@ D5700Computer *-- Keyboard
 D5700Computer *-- CpuScheduler
 D5700Computer *-- TimerService
 
-CPU --> InstructionFactory
-CPU --> MemoryStrategy
+CPU *-- MemoryController
 CPU --> MemoryDevice
 CPU --> Display
 CPU --> InputDevice
+CPU --> InstructionFactory
+
+MemoryController --> MemoryStrategy
+MemoryController --> MemoryDevice
 
 InstructionFactory ..> Instruction
 
-RamStrategy --> RAM
-RomStrategy --> ROM
+RamStrategy --> MemoryDevice
+RomStrategy --> MemoryDevice
 
 CpuScheduler --> CPU
 TimerService --> CPU
 
-DrawInstruction ..> Display
+DrawInstruction ..> CPU
+ReadKeyboardInstruction ..> CPU
 
 @enduml

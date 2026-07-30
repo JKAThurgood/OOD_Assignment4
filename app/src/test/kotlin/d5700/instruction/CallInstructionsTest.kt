@@ -56,9 +56,13 @@ class CallInstructionTest {
 
     @Test
     fun readInstructionReadsMemory() {
-        val cpu = cpuWithRam()
-        cpu.loadAddress(20)
-        cpu.getRam()!!.write(20, 42)
+        val ram = RAM()
+        val cpu = CPU().apply {
+            attachDevices(ram, null, null, null)
+            loadAddress(20)
+        }
+
+        ram.write(20, 42)
 
         execute(cpu, 0x3000)
 
@@ -67,13 +71,16 @@ class CallInstructionTest {
 
     @Test
     fun writeInstructionWritesRegisterToMemory() {
-        val cpu = cpuWithRam()
-        cpu.loadAddress(20)
-        cpu.writeRegister(0, 99)
+        val ram = RAM()
+        val cpu = CPU().apply {
+            attachDevices(ram, null, null, null)
+            loadAddress(20)
+            writeRegister(0, 99)
+        }
 
         execute(cpu, 0x4000)
 
-        assertEquals(99, cpu.getRam()!!.read(20))
+        assertEquals(99, ram.read(20))
     }
 
     @Test
@@ -150,15 +157,19 @@ class CallInstructionTest {
 
     @Test
     fun convertBase10StoresDigits() {
-        val cpu = cpuWithRam()
+        val ram = RAM()
+        val cpu = CPU().apply {
+            attachDevices(ram, null, null, null)
+        }
+
         cpu.loadAddress(50)
         cpu.writeRegister(0, 253.toByte())
 
         execute(cpu, 0xD000)
 
-        assertEquals(2.toByte(), cpu.getRam()!!.read(50))
-        assertEquals(5.toByte(), cpu.getRam()!!.read(51))
-        assertEquals(3.toByte(), cpu.getRam()!!.read(52))
+        assertEquals(2.toByte(), ram.read(50))
+        assertEquals(5.toByte(), ram.read(51))
+        assertEquals(3.toByte(), ram.read(52))
     }
 
     @Test
@@ -183,12 +194,15 @@ class CallInstructionTest {
 
     @Test
     fun drawInstructionUpdatesScreen() {
-        val cpu = cpuWithRam()
+        val ram = RAM()
         val screen = Screen()
 
         screen.clear()
 
-        cpu.attachDevices(cpu.getRam(), cpu.getRom(), screen, null)
+        val cpu = CPU().apply {
+            attachDevices(ram, null, screen, null)
+        }
+
         cpu.writeRegister(0, 'X'.code.toByte())
         cpu.writeRegister(1, 2)
         cpu.writeRegister(2, 3)
