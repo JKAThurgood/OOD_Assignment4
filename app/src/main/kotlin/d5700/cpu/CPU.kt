@@ -73,14 +73,10 @@ class CPU {
             return
         }
 
-        try {
-            val opcode = fetchInstruction()
+        val opcode = fetchInstruction()
+        val instruction = instructionFactory.create(opcode)
 
-            val instruction = instructionFactory.create(opcode)
-            instruction.execute(this)
-        } catch (_: IllegalStateException) {
-            terminated = true
-        }
+        instruction.execute(this)
     }
 
     fun fetchInstruction(): Short {
