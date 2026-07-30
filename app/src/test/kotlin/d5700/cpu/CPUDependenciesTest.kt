@@ -1,5 +1,6 @@
 package d5700.cpu
 
+import d5700.hardware.Hardware
 import d5700.instruction.DrawInstruction
 import d5700.instruction.ReadKeyboardInstruction
 import d5700.io.Display
@@ -14,14 +15,14 @@ class CPUDependenciesTest {
 
     @Test
     fun switchMemoryTogglesBetweenRamAndRomStrategies() {
-        val cpu = CPU().apply {
-            attachDevices(
-                RAM(),
-                ROM(writable = true),
-                null,
-                null
+        val cpu = CPU(
+            Hardware(
+                ram = RAM(),
+                rom = ROM(writable = true),
+                display = FakeDisplay(),
+                input = FakeInputDevice(0)
             )
-        }
+        )
 
         cpu.switchMemory()
         assertTrue(cpu.hasMemory())
@@ -34,14 +35,14 @@ class CPUDependenciesTest {
     fun drawInstructionUsesInjectedDisplay() {
         val fakeDisplay = FakeDisplay()
 
-        val cpu = CPU().apply {
-            attachDevices(
-                RAM(),
-                null,
-                fakeDisplay,
-                null
+        val cpu = CPU(
+            Hardware(
+                ram = RAM(),
+                rom = ROM(writable = true),
+                display = fakeDisplay,
+                input = FakeInputDevice(0)
             )
-
+        ).apply {
             writeRegister(0, 0x41.toByte())
             writeRegister(1, 0)
             writeRegister(2, 0)
@@ -56,14 +57,14 @@ class CPUDependenciesTest {
     fun readKeyboardInstructionUsesInjectedInput() {
         val fakeInput = FakeInputDevice(0x5A.toByte())
 
-        val cpu = CPU().apply {
-            attachDevices(
-                RAM(),
-                null,
-                null,
-                fakeInput
+        val cpu = CPU(
+            Hardware(
+                ram = RAM(),
+                rom = ROM(writable = true),
+                display = FakeDisplay(),
+                input = fakeInput
             )
-        }
+        )
 
         ReadKeyboardInstruction().execute(cpu)
 

@@ -2,16 +2,28 @@ package d5700.instruction
 
 import d5700.cpu.CPU
 import d5700.factory.InstructionFactory
+import d5700.hardware.Hardware
+import d5700.io.Keyboard
+import d5700.io.Screen
 import d5700.memory.RAM
+import d5700.memory.ROM
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class InstructionTest {
 
     private fun cpuWithRam(): CPU {
-        return CPU().apply {
-            attachDevices(RAM(), null, null, null)
-        }
+        val ram = RAM()
+        val rom = ROM(writable = true)
+
+        return CPU(
+            Hardware(
+                ram = ram,
+                rom = rom,
+                display = Screen(),
+                input = Keyboard()
+            )
+        )
     }
 
     @Test

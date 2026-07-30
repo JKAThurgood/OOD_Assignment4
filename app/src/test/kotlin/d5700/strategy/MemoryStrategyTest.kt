@@ -1,6 +1,9 @@
 package d5700.strategy
 
 import d5700.cpu.CPU
+import d5700.hardware.Hardware
+import d5700.io.Keyboard
+import d5700.io.Screen
 import d5700.memory.RAM
 import d5700.memory.ROM
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -11,8 +14,15 @@ class MemoryStrategyTest {
     @Test
     fun ramStrategyUsesCpuAddressRegister() {
         val ram = RAM()
-        val cpu = CPU().apply {
-            attachDevices(ram, null, null, null)
+
+        val cpu = CPU(
+            Hardware(
+                ram = ram,
+                rom = ROM(writable = true),
+                display = Screen(),
+                input = Keyboard()
+            )
+        ).apply {
             loadAddress(20)
         }
 
@@ -24,8 +34,15 @@ class MemoryStrategyTest {
     @Test
     fun romStrategyUsesCpuAddressRegister() {
         val rom = ROM(writable = true)
-        val cpu = CPU().apply {
-            attachDevices(null, rom, null, null)
+
+        val cpu = CPU(
+            Hardware(
+                ram = RAM(),
+                rom = rom,
+                display = Screen(),
+                input = Keyboard()
+            )
+        ).apply {
             loadAddress(20)
         }
 

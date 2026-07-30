@@ -1,14 +1,12 @@
 package d5700.cpu
 
 import d5700.factory.InstructionFactory
-import d5700.io.Display
-import d5700.io.InputDevice
+import d5700.hardware.Hardware
 import d5700.memory.MemoryController
-import d5700.memory.MemoryDevice
-import d5700.strategy.MemoryStrategy
 
-
-class CPU {
+class CPU(
+    private val hardware: Hardware
+) {
     private val instructionFactory = InstructionFactory()
 
     private val registers = ByteArray(8)
@@ -17,10 +15,8 @@ class CPU {
     private var timer: Byte = 0
     private var address = 0
 
-    private var memoryController: MemoryController? = null
-    private var rom: MemoryDevice? = null
-    private var display: Display? = null
-    private var input: InputDevice? = null
+    private val memoryController =
+        MemoryController(hardware)
 
     private var terminated = false
 
@@ -73,44 +69,30 @@ class CPU {
     }
 
     fun hasMemory(): Boolean {
-        return memoryController?.hasMemory() == true
+        return memoryController.hasMemory()
     }
 
     fun readMemory(): Byte {
-        return memoryController?.read(this)
-            ?: throw IllegalStateException("Memory controller not set")
+        return memoryController.read(this)
     }
 
     fun writeMemory(value: Byte) {
-        memoryController?.write(this, value)
-            ?: throw IllegalStateException("Memory controller not set")
-    }
-
-    fun attachDevices(
-        ram: MemoryDevice?,
-        rom: MemoryDevice?,
-        display: Display?,
-        input: InputDevice?
-    ) {
-        this.rom = rom
-        this.display = display
-        this.input = input
-        this.memoryController = MemoryController(ram, rom)
+        memoryController.write(this, value)
     }
 
     fun drawRegister(registerIndex: Int, row: Int, column: Int) {
-        display?.draw(
+        hardware.display.draw(
             readRegister(registerIndex),
             row,
             column
-        ) ?: throw IllegalStateException("Display is not set")
+        )
     }
 
     fun readInputInto(registerIndex: Int) {
-        val value = input?.readHexByte()
-            ?: throw IllegalStateException("Input device is not set")
-
-        writeRegister(registerIndex, value)
+        writeRegister(
+            registerIndex,
+            hardware.input.readHexByte()
+        )
     }
 
     fun resetState() {
@@ -120,7 +102,7 @@ class CPU {
         registers.fill(0)
         terminated = false
 
-        memoryController?.reset()
+        memoryController.reset()
     }
 
     fun isHalted(): Boolean = terminated
@@ -139,18 +121,14 @@ class CPU {
             "PC must be even"
         }
 
-        val programMemory = rom
-            ?: throw IllegalStateException("ROM is not set")
-
-        val firstByte = programMemory.read(pc).toInt() and 0xFF
-        val secondByte = programMemory.read(pc + 1).toInt() and 0xFF
+        val firstByte = hardware.rom.read(pc).toInt() and 0xFF
+        val secondByte = hardware.rom.read(pc + 1).toInt() and 0xFF
 
         return ((firstByte shl 8) or secondByte).toShort()
     }
 
     fun switchMemory() {
-        memoryController?.switchMode()
-            ?: throw IllegalStateException("Memory controller not set")
+        memoryController.switchMode()
     }
 
     fun terminate(message: String = "Program terminated") {

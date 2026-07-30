@@ -1,6 +1,7 @@
 @startuml
 
 skinparam classAttributeIconSize 0
+skinparam shadowing true
 
 package "Facade" {
 
@@ -28,9 +29,7 @@ package "CPU" {
         -timer : Byte
         -address : Int
         -memoryController : MemoryController
-        -rom : MemoryDevice?
-        -display : Display?
-        -input : InputDevice?
+        -hardware : Hardware
         -terminated : Boolean
 
         +readRegister(index:Int) : Byte
@@ -50,6 +49,18 @@ package "CPU" {
         +switchMemory()
         +terminate(msg:String)
     }
+
+    class Hardware {
+        -ram : MemoryDevice?
+        -rom : MemoryDevice?
+        -display : Display?
+        -input : InputDevice?
+
+        +getMemoryController() : MemoryController
+        +getROM() : MemoryDevice?
+        +draw(ascii:Byte,row:Int,column:Int)
+        +readInput() : Byte
+    }
 }
 
 package "Instructions" {
@@ -65,27 +76,24 @@ package "Instructions" {
     class AddInstruction
     class SubInstruction
     class ReadInstruction
-
     class WriteInstruction
     class JumpInstruction
     class ReadKeyboardInstruction
     class SwitchMemoryInstruction
-
     class SkipEqualInstruction
     class SkipNotEqualInstruction
     class SetAInstruction
     class SetTInstruction
-
     class ReadTInstruction
     class ConvertBase10Instruction
     class ConvertAsciiInstruction
     class DrawInstruction
 
     Instruction <|-- StoreInstruction
+    Instruction <|-- HaltInstruction
     Instruction <|-- AddInstruction
     Instruction <|-- SubInstruction
     Instruction <|-- ReadInstruction
-    Instruction <|-- HaltInstruction
     Instruction <|-- WriteInstruction
     Instruction <|-- JumpInstruction
     Instruction <|-- ReadKeyboardInstruction
@@ -98,6 +106,27 @@ package "Instructions" {
     Instruction <|-- ConvertBase10Instruction
     Instruction <|-- ConvertAsciiInstruction
     Instruction <|-- DrawInstruction
+
+    ' Shadow relationships force layout spacing
+    StoreInstruction -[hidden]- HaltInstruction
+    HaltInstruction -[hidden]- AddInstruction
+    AddInstruction -[hidden]- SubInstruction
+    SubInstruction -[hidden]- ReadInstruction
+    ReadInstruction -[hidden]- WriteInstruction
+
+    WriteInstruction -[hidden]- JumpInstruction
+    JumpInstruction -[hidden]- ReadKeyboardInstruction
+    ReadKeyboardInstruction -[hidden]- SwitchMemoryInstruction
+
+    SwitchMemoryInstruction -[hidden]- SkipEqualInstruction
+    SkipEqualInstruction -[hidden]- SkipNotEqualInstruction
+    SkipNotEqualInstruction -[hidden]- SetAInstruction
+    SetAInstruction -[hidden]- SetTInstruction
+
+    SetTInstruction -[hidden]- ReadTInstruction
+    ReadTInstruction -[hidden]- ConvertBase10Instruction
+    ConvertBase10Instruction -[hidden]- ConvertAsciiInstruction
+    ConvertAsciiInstruction -[hidden]- DrawInstruction
 }
 
 package "Factory" {
@@ -198,23 +227,23 @@ package "Scheduling" {
     }
 }
 
-'=========================
 ' Relationships
-'=========================
 
 D5700Computer *-- CPU
 D5700Computer *-- RAM
 D5700Computer *-- ROM
-D5700Computer --> Display
+D5700Computer *-- Display
 D5700Computer *-- Keyboard
 D5700Computer *-- CpuScheduler
 D5700Computer *-- TimerService
 
+CPU *-- Hardware
 CPU *-- MemoryController
-CPU --> MemoryDevice
-CPU --> Display
-CPU --> InputDevice
 CPU --> InstructionFactory
+
+Hardware --> MemoryController
+Hardware --> Display
+Hardware --> InputDevice
 
 MemoryController --> MemoryStrategy
 MemoryController --> MemoryDevice

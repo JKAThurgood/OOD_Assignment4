@@ -7,11 +7,18 @@ class RomStrategy(
     private val rom: MemoryDevice
 ) : MemoryStrategy {
 
-    override fun read(cpu: CPU): Byte {
-        return rom.read(cpu.getAddress())
-    }
+    override fun read(cpu: CPU): Byte =
+        rom.read(cpu.getAddress())
 
-    override fun write(cpu: CPU, value: Byte) {
+    override fun write(cpu: CPU, value: Byte) =
         rom.write(cpu.getAddress(), value)
+
+    override fun next(
+        ram: MemoryDevice?,
+        rom: MemoryDevice?
+    ): MemoryStrategy {
+        return RamStrategy(
+            ram ?: throw IllegalStateException("RAM not set")
+        )
     }
 }

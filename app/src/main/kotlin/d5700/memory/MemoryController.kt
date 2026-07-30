@@ -1,17 +1,16 @@
 package d5700.memory
 
 import d5700.cpu.CPU
+import d5700.hardware.Hardware
 import d5700.strategy.MemoryStrategy
 import d5700.strategy.RamStrategy
-import d5700.strategy.RomStrategy
 
 class MemoryController(
-    private val ram: MemoryDevice?,
-    private val rom: MemoryDevice?
+    private val hardware: Hardware
 ) {
 
     private var strategy: MemoryStrategy? =
-        ram?.let { RamStrategy(it) }
+        RamStrategy(hardware.ram)
 
     fun read(cpu: CPU): Byte {
         return strategy?.read(cpu)
@@ -24,29 +23,14 @@ class MemoryController(
     }
 
     fun switchMode() {
-        strategy = when (strategy) {
-            is RamStrategy ->
-                RomStrategy(
-                    rom ?: throw IllegalStateException("ROM not set")
-                )
-
-            is RomStrategy ->
-                RamStrategy(
-                    ram ?: throw IllegalStateException("RAM not set")
-                )
-
-            null ->
-                RamStrategy(
-                    ram ?: throw IllegalStateException("RAM not set")
-                )
-
-            else ->
-                throw IllegalStateException("Unknown memory strategy")
-        }
+        strategy = strategy?.next(
+            hardware.ram,
+            hardware.rom
+        ) ?: RamStrategy(hardware.ram)
     }
 
     fun reset() {
-        strategy = ram?.let { RamStrategy(it) }
+        strategy = RamStrategy(hardware.ram)
     }
 
     fun hasMemory(): Boolean = strategy != null

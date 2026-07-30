@@ -1,6 +1,7 @@
 package d5700
 
 import d5700.cpu.CPU
+import d5700.hardware.Hardware
 import d5700.io.Display
 import d5700.io.Keyboard
 import d5700.io.Screen
@@ -13,20 +14,28 @@ class D5700Computer(
     display: Display? = null,
     inputDevice: Keyboard? = null
 ) {
-    val cpu = CPU()
     val ram = RAM()
     val rom = ROM(writable = true)
     val screen: Display = display ?: Screen()
     private val keyboard: Keyboard = inputDevice ?: Keyboard()
+
+    private val hardware = Hardware(
+        ram = ram,
+        rom = rom,
+        display = screen,
+        input = keyboard
+    )
+
+    val cpu = CPU(hardware)
+
     private val cpuScheduler = CpuScheduler(cpu)
     private val timerService = TimerService(cpu)
 
-    init {
-        cpu.attachDevices(ram, rom, screen, keyboard)
-    }
-
     fun loadProgram(data: ByteArray) {
-        require(data.size <= 4096) { "Program data must fit in ROM" }
+        require(data.size <= 4096) {
+            "Program data must fit in ROM"
+        }
+
         for (index in data.indices) {
             rom.write(index, data[index])
         }
@@ -36,6 +45,7 @@ class D5700Computer(
         if (cpu.isHalted()) {
             cpu.terminate("Program already halted")
         }
+
         cpuScheduler.start()
         timerService.start()
     }
@@ -46,7 +56,6 @@ class D5700Computer(
     }
 
     fun reset() {
-        cpu.attachDevices(ram, rom, screen, keyboard)
         cpu.resetState()
         screen.clear()
     }

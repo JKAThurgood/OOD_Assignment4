@@ -2,6 +2,8 @@ package d5700.instruction
 
 import d5700.cpu.CPU
 import d5700.factory.InstructionFactory
+import d5700.hardware.Hardware
+import d5700.io.Keyboard
 import d5700.io.Screen
 import d5700.memory.RAM
 import d5700.memory.ROM
@@ -14,9 +16,17 @@ class CallInstructionTest {
     private val factory = InstructionFactory()
 
     private fun cpuWithRam(): CPU {
-        return CPU().apply {
-            attachDevices(RAM(), ROM(writable = true), null, null)
-        }
+        val ram = RAM()
+        val rom = ROM(writable = true)
+
+        return CPU(
+            Hardware(
+                ram = ram,
+                rom = rom,
+                display = Screen(),
+                input = Keyboard()
+            )
+        )
     }
 
     private fun execute(cpu: CPU, opcode: Int) {
@@ -57,8 +67,14 @@ class CallInstructionTest {
     @Test
     fun readInstructionReadsMemory() {
         val ram = RAM()
-        val cpu = CPU().apply {
-            attachDevices(ram, null, null, null)
+        val cpu = CPU(
+            Hardware(
+                ram = ram,
+                rom = ROM(writable = true),
+                display = Screen(),
+                input = Keyboard()
+            )
+        ).apply {
             loadAddress(20)
         }
 
@@ -72,8 +88,14 @@ class CallInstructionTest {
     @Test
     fun writeInstructionWritesRegisterToMemory() {
         val ram = RAM()
-        val cpu = CPU().apply {
-            attachDevices(ram, null, null, null)
+        val cpu = CPU(
+            Hardware(
+                ram = ram,
+                rom = ROM(writable = true),
+                display = Screen(),
+                input = Keyboard()
+            )
+        ).apply {
             loadAddress(20)
             writeRegister(0, 99)
         }
@@ -158,9 +180,14 @@ class CallInstructionTest {
     @Test
     fun convertBase10StoresDigits() {
         val ram = RAM()
-        val cpu = CPU().apply {
-            attachDevices(ram, null, null, null)
-        }
+        val cpu = CPU(
+            Hardware(
+                ram = ram,
+                rom = ROM(writable = true),
+                display = Screen(),
+                input = Keyboard()
+            )
+        )
 
         cpu.loadAddress(50)
         cpu.writeRegister(0, 253.toByte())
@@ -199,9 +226,14 @@ class CallInstructionTest {
 
         screen.clear()
 
-        val cpu = CPU().apply {
-            attachDevices(ram, null, screen, null)
-        }
+        val cpu = CPU(
+            Hardware(
+                ram = ram,
+                rom = ROM(writable = true),
+                display = screen,
+                input = Keyboard()
+            )
+        )
 
         cpu.writeRegister(0, 'X'.code.toByte())
         cpu.writeRegister(1, 2)

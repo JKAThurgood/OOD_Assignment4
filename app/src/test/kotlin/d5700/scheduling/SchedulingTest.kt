@@ -1,6 +1,9 @@
 package d5700.scheduling
 
 import d5700.cpu.CPU
+import d5700.hardware.Hardware
+import d5700.io.Keyboard
+import d5700.io.Screen
 import d5700.memory.RAM
 import d5700.memory.ROM
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -14,8 +17,14 @@ class SchedulingTest {
         rom.write(0, 0x10.toByte())
         rom.write(1, 0x00.toByte())
 
-        val cpu = CPU().apply {
-            attachDevices(RAM(), rom, null, null)
+        val cpu = CPU(
+            Hardware(
+                ram = RAM(),
+                rom = rom,
+                display = Screen(),
+                input = Keyboard()
+            )
+        ).apply {
             jumpTo(0)
         }
 
@@ -33,7 +42,14 @@ class SchedulingTest {
 
     @Test
     fun timerServiceDecrementsCpuTimerAt60Hz() {
-        val cpu = CPU().apply {
+        val cpu = CPU(
+            Hardware(
+                ram = RAM(),
+                rom = ROM(writable = true),
+                display = Screen(),
+                input = Keyboard()
+            )
+        ).apply {
             setTimer(5.toByte())
         }
 

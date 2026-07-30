@@ -1,8 +1,10 @@
 package d5700.cpu
 
+import d5700.hardware.Hardware
+import d5700.io.Keyboard
+import d5700.io.Screen
 import d5700.memory.RAM
 import d5700.memory.ROM
-import d5700.strategy.RamStrategy
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
@@ -15,13 +17,14 @@ class CPUTest {
         rom.write(0, 0x10.toByte())
         rom.write(1, 0x00.toByte())
 
-        val cpu = CPU().apply {
-            attachDevices(
-                null,
-                rom,
-                null,
-                null
+        val cpu = CPU(
+            Hardware(
+                ram = RAM(),
+                rom = rom,
+                display = Screen(),
+                input = Keyboard()
             )
+        ).apply {
             jumpTo(0)
         }
 
@@ -30,7 +33,14 @@ class CPUTest {
 
     @Test
     fun incrementAndSkipAdjustProgramCounter() {
-        val cpu = CPU().apply {
+        val cpu = CPU(
+            Hardware(
+                ram = RAM(),
+                rom = ROM(writable = true),
+                display = Screen(),
+                input = Keyboard()
+            )
+        ).apply {
             jumpTo(4)
         }
 
@@ -43,7 +53,14 @@ class CPUTest {
 
     @Test
     fun jumpToRejectsOddProgramCounter() {
-        val cpu = CPU()
+        val cpu = CPU(
+            Hardware(
+                ram = RAM(),
+                rom = ROM(writable = true),
+                display = Screen(),
+                input = Keyboard()
+            )
+        )
 
         assertThrows(IllegalArgumentException::class.java) {
             cpu.jumpTo(3)
@@ -56,10 +73,14 @@ class CPUTest {
         rom.write(0, 0x10.toByte())
         rom.write(1, 0x00.toByte())
 
-        val ram = RAM()
-
-        val cpu = CPU().apply {
-            attachDevices(ram, rom, null, null)
+        val cpu = CPU(
+            Hardware(
+                ram = RAM(),
+                rom = rom,
+                display = Screen(),
+                input = Keyboard()
+            )
+        ).apply {
             jumpTo(0)
         }
 
@@ -70,7 +91,14 @@ class CPUTest {
 
     @Test
     fun terminateStopsExecution() {
-        val cpu = CPU()
+        val cpu = CPU(
+            Hardware(
+                ram = RAM(),
+                rom = ROM(writable = true),
+                display = Screen(),
+                input = Keyboard()
+            )
+        )
 
         val exception = assertThrows(IllegalStateException::class.java) {
             cpu.terminate("done")
