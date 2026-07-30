@@ -16,27 +16,26 @@ class CPUDependenciesTest {
     @Test
     fun switchMemoryTogglesBetweenRamAndRomStrategies() {
         val cpu = CPU().apply {
-            ram = RAM()
-            rom = ROM(writable = true)
-            memoryStrategy = RamStrategy(ram!!)
+            attachDevices(RAM(), ROM(writable = true), null, null)
+            setMemoryStrategy(RamStrategy(getRam()!!))
         }
 
         cpu.switchMemory()
-        assertTrue(cpu.memoryStrategy is RomStrategy)
+        assertTrue(cpu.getMemoryStrategy() is RomStrategy)
 
         cpu.switchMemory()
-        assertTrue(cpu.memoryStrategy is RamStrategy)
+        assertTrue(cpu.getMemoryStrategy() is RamStrategy)
     }
 
     @Test
     fun drawInstructionUsesInjectedDisplay() {
         val fakeDisplay = FakeDisplay()
         val cpu = CPU().apply {
-            display = fakeDisplay
-            memoryStrategy = RamStrategy(RAM())
-            registers[0] = 0x41.toByte()
-            registers[1] = 0x00.toByte()
-            registers[2] = 0x00.toByte()
+            setDisplay(fakeDisplay)
+            setMemoryStrategy(RamStrategy(RAM()))
+            setRegister(0, 0x41.toByte())
+            setRegister(1, 0x00.toByte())
+            setRegister(2, 0x00.toByte())
         }
 
         DrawInstruction().execute(cpu)
@@ -48,13 +47,13 @@ class CPUDependenciesTest {
     fun readKeyboardInstructionUsesInjectedInput() {
         val fakeInput = FakeInputDevice(0x5A.toByte())
         val cpu = CPU().apply {
-            input = fakeInput
-            memoryStrategy = RamStrategy(RAM())
+            setInput(fakeInput)
+            setMemoryStrategy(RamStrategy(RAM()))
         }
 
         ReadKeyboardInstruction().execute(cpu)
 
-        assertEquals(0x5A.toByte(), cpu.registers[0])
+        assertEquals(0x5A.toByte(), cpu.getRegister(0))
     }
 
     private class FakeDisplay : Display {

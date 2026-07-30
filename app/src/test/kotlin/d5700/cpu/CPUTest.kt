@@ -17,8 +17,8 @@ class CPUTest {
         rom.write(1, 0x00.toByte())
 
         val cpu = CPU().apply {
-            this.rom = rom
-            pc = 0
+            setRom(rom)
+            setProgramCounter(0)
         }
 
         assertEquals(0x1000.toShort(), cpu.fetchInstruction())
@@ -26,13 +26,13 @@ class CPUTest {
 
     @Test
     fun incrementAndSkipAdjustProgramCounter() {
-        val cpu = CPU().apply { pc = 4 }
+        val cpu = CPU().apply { setProgramCounter(4) }
 
         cpu.incrementPC()
-        assertEquals(6, cpu.pc)
+        assertEquals(6, cpu.getProgramCounter())
 
         cpu.skipInstruction()
-        assertEquals(10, cpu.pc)
+        assertEquals(10, cpu.getProgramCounter())
     }
 
     @Test
@@ -42,14 +42,14 @@ class CPUTest {
         rom.write(1, 0x00.toByte())
 
         val cpu = CPU().apply {
-            this.rom = rom
-            pc = 0
-            memoryStrategy = RamStrategy(RAM())
+            setRom(rom)
+            setProgramCounter(0)
+            setMemoryStrategy(RamStrategy(RAM()))
         }
 
         cpu.cycle()
 
-        assertEquals(2, cpu.pc)
+        assertEquals(2, cpu.getProgramCounter())
     }
 
     @Test

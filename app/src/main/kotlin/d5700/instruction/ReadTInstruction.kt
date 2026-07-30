@@ -10,6 +10,6 @@ class ReadTInstruction : Instruction() {
     }
 
     override fun perform(cpu: CPU) {
-        cpu.registers[destinationRegister] = cpu.timer
+        cpu.setRegister(destinationRegister, cpu.getTimer())
     }
 }

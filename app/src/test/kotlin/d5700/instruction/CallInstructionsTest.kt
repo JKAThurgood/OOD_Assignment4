@@ -16,8 +16,8 @@ class CallInstructionTest {
 
     private fun cpuWithRam(): CPU {
         return CPU().apply {
-            ram = RAM()
-            memoryStrategy = RamStrategy(ram!!)
+            attachDevices(RAM(), null, null, null)
+            setMemoryStrategy(RamStrategy(getRam()!!))
         }
     }
 
@@ -28,168 +28,167 @@ class CallInstructionTest {
     @Test
     fun addInstructionAddsRegisters() {
         val cpu = cpuWithRam()
-        cpu.registers[0] = 10
-        cpu.registers[1] = 5
+        cpu.setRegister(0, 10)
+        cpu.setRegister(1, 5)
 
         execute(cpu, 0x1010)
 
-        assertEquals(15, cpu.registers[0])
+        assertEquals(15, cpu.getRegister(0))
     }
 
     @Test
     fun subInstructionSubtractsRegisters() {
         val cpu = cpuWithRam()
-        cpu.registers[0] = 10
-        cpu.registers[1] = 3
+        cpu.setRegister(0, 10)
+        cpu.setRegister(1, 3)
 
         execute(cpu, 0x2010)
 
-        assertEquals(7, cpu.registers[0])
+        assertEquals(7, cpu.getRegister(0))
     }
 
     @Test
     fun storeInstructionStoresImmediateValueInRegister() {
         val cpu = cpuWithRam()
-        cpu.address = 20
-        cpu.registers[0] = 55
+        cpu.setAddress(20)
+        cpu.setRegister(0, 55)
 
         execute(cpu, 0x0010)
 
-        assertEquals(16.toByte(), cpu.registers[0])
+        assertEquals(16.toByte(), cpu.getRegister(0))
     }
 
     @Test
     fun readInstructionReadsMemory() {
         val cpu = cpuWithRam()
-        cpu.address = 20
-        cpu.ram!!.write(20, 42)
+        cpu.setAddress(20)
+        cpu.getRam()!!.write(20, 42)
 
         execute(cpu, 0x3000)
 
-        assertEquals(42, cpu.registers[0])
+        assertEquals(42, cpu.getRegister(0))
     }
 
     @Test
     fun writeInstructionWritesRegisterToMemory() {
         val cpu = cpuWithRam()
-        cpu.address = 20
-        cpu.registers[0] = 99
+        cpu.setAddress(20)
+        cpu.setRegister(0, 99)
 
         execute(cpu, 0x4000)
 
-        assertEquals(99, cpu.ram!!.read(20))
+        assertEquals(99, cpu.getRam()!!.read(20))
     }
 
     @Test
     fun jumpInstructionSetsProgramCounter() {
         val cpu = cpuWithRam()
-        cpu.address = 100
-        cpu.pc = 20
+        cpu.setProgramCounter(20)
 
-        execute(cpu, 0x5000)
+        execute(cpu, 0x5064) // jump to address 100 (0x64)
 
-        assertEquals(100, cpu.pc)
+        assertEquals(100, cpu.getProgramCounter())
     }
 
     @Test
     fun switchMemoryChangesMemoryStrategy() {
         val cpu = cpuWithRam()
-        cpu.rom = ROM(writable = true)
+        cpu.setRom(ROM(writable = true))
 
-        val before = cpu.memoryStrategy
+        val before = cpu.getMemoryStrategy()
 
         execute(cpu, 0x7000)
 
-        assertTrue(cpu.memoryStrategy !== before)
+        assertTrue(cpu.getMemoryStrategy() !== before)
     }
 
     @Test
     fun skipEqualSkipsInstruction() {
         val cpu = cpuWithRam()
-        cpu.pc = 10
-        cpu.registers[0] = 5
-        cpu.registers[1] = 5
+        cpu.setProgramCounter(10)
+        cpu.setRegister(0, 5)
+        cpu.setRegister(1, 5)
 
         execute(cpu, 0x8010)
 
-        assertEquals(14, cpu.pc)
+        assertEquals(14, cpu.getProgramCounter())
     }
 
     @Test
     fun skipNotEqualSkipsInstruction() {
         val cpu = cpuWithRam()
-        cpu.pc = 10
-        cpu.registers[0] = 5
-        cpu.registers[1] = 6
+        cpu.setProgramCounter(10)
+        cpu.setRegister(0, 5)
+        cpu.setRegister(1, 6)
 
         execute(cpu, 0x9010)
 
-        assertEquals(14, cpu.pc)
+        assertEquals(14, cpu.getProgramCounter())
     }
 
     @Test
     fun setAStoresAddress() {
         val cpu = cpuWithRam()
-        cpu.registers[0] = 50
-        execute(cpu, 0xA000)
 
-        assertEquals(50, cpu.address)
+        execute(cpu, 0xA032) // A = 50
+
+        assertEquals(50, cpu.getAddress())
     }
 
     @Test
     fun setTStoresTimer() {
         val cpu = cpuWithRam()
-        cpu.registers[0] = 25
+        cpu.setRegister(0, 25)
 
         execute(cpu, 0xB190)
 
-        assertEquals(25.toByte(), cpu.timer)
+        assertEquals(25.toByte(), cpu.getTimer())
     }
 
     @Test
     fun readTReadsTimer() {
         val cpu = cpuWithRam()
-        cpu.timer = 33
+        cpu.setTimer(33)
 
         execute(cpu, 0xC000)
 
-        assertEquals(33, cpu.registers[0])
+        assertEquals(33, cpu.getRegister(0))
     }
 
     @Test
     fun convertBase10StoresDigits() {
         val cpu = cpuWithRam()
-        cpu.address = 50
-        cpu.registers[0] = 253.toByte()
+        cpu.setAddress(50)
+        cpu.setRegister(0, 253.toByte())
 
         execute(cpu, 0xD000)
 
-        assertEquals(2.toByte(), cpu.ram!!.read(50))
-        assertEquals(5.toByte(), cpu.ram!!.read(51))
-        assertEquals(3.toByte(), cpu.ram!!.read(52))
+        assertEquals(2.toByte(), cpu.getRam()!!.read(50))
+        assertEquals(5.toByte(), cpu.getRam()!!.read(51))
+        assertEquals(3.toByte(), cpu.getRam()!!.read(52))
     }
 
     @Test
     fun convertAsciiConvertsHexDigit() {
         val cpu = cpuWithRam()
-        cpu.registers[0] = 10
+        cpu.setRegister(0, 10)
 
         execute(cpu, 0xE010)
 
-        assertEquals('A'.code.toByte(), cpu.registers[1])
+        assertEquals('A'.code.toByte(), cpu.getRegister(1))
     }
 
     @Test
     fun drawInstructionUpdatesScreen() {
         val cpu = cpuWithRam()
-        val screen = Screen.instance()
+        val screen = Screen()
 
         screen.clear()
 
-        cpu.display = screen
-        cpu.registers[0] = 'X'.code.toByte()
-        cpu.registers[1] = 2
-        cpu.registers[2] = 3
+        cpu.setDisplay(screen)
+        cpu.setRegister(0, 'X'.code.toByte())
+        cpu.setRegister(1, 2)
+        cpu.setRegister(2, 3)
 
         execute(cpu, 0xF023)
 

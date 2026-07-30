@@ -10,8 +10,10 @@ class ReadInstruction : Instruction() {
     }
 
     override fun perform(cpu: CPU) {
-        cpu.registers[destinationRegister] =
-            cpu.memoryStrategy?.read(cpu)
+        cpu.setRegister(
+            destinationRegister,
+            cpu.getMemoryStrategy()?.read(cpu)
                 ?: throw IllegalStateException("Memory strategy not set")
+        )
     }
 }

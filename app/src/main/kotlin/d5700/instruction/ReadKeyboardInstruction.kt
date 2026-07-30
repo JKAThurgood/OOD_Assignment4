@@ -11,8 +11,10 @@ class ReadKeyboardInstruction : Instruction() {
 
     override fun perform(cpu: CPU) {
         println("Waiting for keyboard input...")
-        cpu.registers[destinationRegister] =
-            cpu.input?.readHexByte()
+        cpu.setRegister(
+            destinationRegister,
+            cpu.getInput()?.readHexByte()
                 ?: throw IllegalStateException("Input device is not set")
+        )
     }
 }

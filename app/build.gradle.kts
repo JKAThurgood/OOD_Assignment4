@@ -39,7 +39,7 @@ java {
 
 application {
     // Define the main class for the application.
-    mainClass = "D5700.MainKt"
+    mainClass = "d5700.MainKt"
 }
 
 tasks.named<JavaExec>("run") {
@@ -50,6 +50,14 @@ tasks.named<Test>("test") {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
     finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jar {
+    manifest {
+        attributes(
+            "Main-Class" to "d5700.MainKt"
+        )
+    }
 }
 
 tasks.jacocoTestReport {

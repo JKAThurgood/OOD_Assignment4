@@ -1,13 +1,7 @@
 package d5700.io
 
-class Screen private constructor() : Display {
+class Screen : Display {
     private val frameBuffer = ByteArray(64)
-
-    companion object {
-        private val instance: Screen by lazy { Screen() }
-
-        fun instance(): Screen = instance
-    }
 
     override fun draw(ascii: Byte, row: Int, column: Int) {
         validatePosition(row, column)

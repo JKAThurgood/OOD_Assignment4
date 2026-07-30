@@ -13,15 +13,15 @@ import d5700.strategy.RomStrategy
 class CPU {
     private val instructionFactory = InstructionFactory()
 
-    val registers: ByteArray = ByteArray(8)
-    var pc: Int = 0
-    var timer: Byte = 0
-    var address: Int = 0
-    var memoryStrategy: MemoryStrategy? = null
-    var rom: MemoryDevice? = null
-    var ram: RAM? = null
-    var display: Display? = null
-    var input: InputDevice? = null
+    private val registers: ByteArray = ByteArray(8)
+    private var pc: Int = 0
+    private var timer: Byte = 0
+    private var address: Int = 0
+    private var memoryStrategy: MemoryStrategy? = null
+    private var rom: MemoryDevice? = null
+    private var ram: RAM? = null
+    private var display: Display? = null
+    private var input: InputDevice? = null
 
     var r0: Byte
         get() = registers[0]
@@ -65,6 +65,81 @@ class CPU {
         }
 
     private var terminated = false
+
+    fun getRegister(index: Int): Byte = registers[index]
+
+    fun setRegister(index: Int, value: Byte) {
+        registers[index] = value
+    }
+
+    fun getProgramCounter(): Int = pc
+
+    fun setProgramCounter(value: Int) {
+        pc = value
+    }
+
+    fun advanceProgramCounter(amount: Int) {
+        pc += amount
+    }
+
+    fun getTimer(): Byte = timer
+
+    fun setTimer(value: Int) {
+        timer = value.toByte()
+    }
+
+    fun getAddress(): Int = address
+
+    fun setAddress(value: Int) {
+        address = value
+    }
+
+    fun getMemoryStrategy(): MemoryStrategy? = memoryStrategy
+
+    fun setMemoryStrategy(strategy: MemoryStrategy?) {
+        memoryStrategy = strategy
+    }
+
+    fun getRom(): MemoryDevice? = rom
+
+    fun setRom(rom: MemoryDevice?) {
+        this.rom = rom
+    }
+
+    fun getRam(): RAM? = ram
+
+    fun setRam(ram: RAM?) {
+        this.ram = ram
+    }
+
+    fun getDisplay(): Display? = display
+
+    fun setDisplay(display: Display?) {
+        this.display = display
+    }
+
+    fun getInput(): InputDevice? = input
+
+    fun setInput(input: InputDevice?) {
+        this.input = input
+    }
+
+    fun attachDevices(ram: RAM?, rom: MemoryDevice?, display: Display?, input: InputDevice?) {
+        this.ram = ram
+        this.rom = rom
+        this.display = display
+        this.input = input
+        this.memoryStrategy = if (ram != null) RamStrategy(ram) else null
+    }
+
+    fun resetState() {
+        pc = 0
+        address = 0
+        timer = 0
+        registers.fill(0)
+        terminated = false
+        memoryStrategy = if (ram != null) RamStrategy(ram!!) else null
+    }
 
     fun isHalted(): Boolean = terminated
 

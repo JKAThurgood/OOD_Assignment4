@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
 class MemoryStrategyTest {
     @Test
     fun ramStrategyUsesCpuAddressRegister() {
-        val cpu = CPU().apply { address = 10 }
+        val cpu = CPU().apply { setAddress(10) }
         val ram = RAM()
         val strategy = RamStrategy(ram)
 
@@ -22,7 +22,7 @@ class MemoryStrategyTest {
 
     @Test
     fun romStrategyUsesCpuAddressRegister() {
-        val cpu = CPU().apply { address = 20 }
+        val cpu = CPU().apply { setAddress(20) }
         val rom = ROM(writable = true)
         val strategy = RomStrategy(rom)
 

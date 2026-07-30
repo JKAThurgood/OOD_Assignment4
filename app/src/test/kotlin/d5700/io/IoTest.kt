@@ -11,7 +11,7 @@ import java.io.PrintStream
 class IoTest {
     @Test
     fun screenStoresBytesInTheExpectedPosition() {
-        val screen = Screen.instance()
+        val screen = Screen()
 
         screen.draw(65, 0, 0)
         screen.draw(66, 7, 7)
@@ -23,7 +23,7 @@ class IoTest {
 
     @Test
     fun screenRejectsOutOfRangeCoordinates() {
-        val screen = Screen.instance()
+        val screen = Screen()
 
         assertThrows(IllegalArgumentException::class.java, Executable {
             screen.draw(65, -1, 0)

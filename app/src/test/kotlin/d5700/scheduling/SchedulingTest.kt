@@ -15,9 +15,9 @@ class SchedulingTest {
         rom.write(1, 0x00.toByte())
 
         val cpu = CPU().apply {
-            this.rom = rom
-            pc = 0
-            memoryStrategy = RamStrategy(RAM())
+            setRom(rom)
+            setProgramCounter(0)
+            setMemoryStrategy(RamStrategy(RAM()))
         }
 
         val scheduler = CpuScheduler(cpu)
@@ -26,13 +26,13 @@ class SchedulingTest {
         Thread.sleep(30)
         scheduler.stop()
 
-        assertTrue(cpu.pc > 0, "CPU should execute cycles while the scheduler is running")
+        assertTrue(cpu.getProgramCounter() > 0, "CPU should execute cycles while the scheduler is running")
     }
 
     @Test
     fun timerServiceDecrementsCpuTimerAt60Hz() {
         val cpu = CPU().apply {
-            timer = 5
+            setTimer(5)
         }
 
         val timerService = TimerService(cpu)
@@ -41,6 +41,6 @@ class SchedulingTest {
         Thread.sleep(120)
         timerService.stop()
 
-        assertTrue(cpu.timer < 5, "Timer service should decrement the CPU timer register")
+        assertTrue(cpu.getTimer() < 5, "Timer service should decrement the CPU timer register")
     }
 }

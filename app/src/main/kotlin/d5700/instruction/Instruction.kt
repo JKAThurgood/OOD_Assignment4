@@ -21,7 +21,7 @@ abstract class Instruction {
 
     protected open fun validate(cpu: CPU) {
         if (this !is JumpInstruction) {
-            require(cpu.memoryStrategy != null) {
+            require(cpu.getMemoryStrategy() != null) {
                 "CPU memory strategy must be set"
             }
         }
@@ -46,9 +46,9 @@ abstract class Instruction {
 
         if (shouldIncrementPC()) {
             if (skipTriggered) {
-                cpu.pc += 4
+                cpu.advanceProgramCounter(4)
             } else {
-                cpu.pc += incrementAmount()
+                cpu.advanceProgramCounter(incrementAmount())
             }
         }
     }

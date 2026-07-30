@@ -14,9 +14,11 @@ class SubInstruction : Instruction() {
     }
 
     override fun perform(cpu: CPU) {
-        cpu.registers[registerZ] = (
-                cpu.registers[registerX].toInt() -
-                        cpu.registers[registerY].toInt()
-                ).toByte()
+        cpu.setRegister(
+            registerZ, (
+                    cpu.getRegister(registerX).toInt() -
+                            cpu.getRegister(registerY).toInt()
+                    ).toByte()
+        )
     }
 }

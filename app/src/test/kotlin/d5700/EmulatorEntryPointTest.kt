@@ -1,4 +1,4 @@
-package D5700
+package d5700
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -13,6 +13,6 @@ class EmulatorEntryPointTest {
         Thread.sleep(50)
         computer.stop()
 
-        assertEquals(0, computer.cpu.pc)
+        assertEquals(0, computer.cpu.getProgramCounter())
     }
 }

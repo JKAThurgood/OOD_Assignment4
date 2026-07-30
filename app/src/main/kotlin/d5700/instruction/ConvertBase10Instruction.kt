@@ -11,21 +11,21 @@ class ConvertBase10Instruction : Instruction() {
     }
 
     override fun perform(cpu: CPU) {
-        val value = cpu.registers[sourceRegister].toInt() and 0xFF
-        val startAddress = cpu.address
+        val value = cpu.getRegister(sourceRegister).toInt() and 0xFF
+        val startAddress = cpu.getAddress()
 
         val hundreds = (value / 100).toByte()
         val tens = ((value / 10) % 10).toByte()
         val ones = (value % 10).toByte()
 
-        cpu.memoryStrategy?.write(cpu, hundreds)
-        cpu.address = startAddress + 1
+        cpu.getMemoryStrategy()?.write(cpu, hundreds)
+        cpu.setAddress(startAddress + 1)
 
-        cpu.memoryStrategy?.write(cpu, tens)
-        cpu.address = startAddress + 2
+        cpu.getMemoryStrategy()?.write(cpu, tens)
+        cpu.setAddress(startAddress + 2)
 
-        cpu.memoryStrategy?.write(cpu, ones)
+        cpu.getMemoryStrategy()?.write(cpu, ones)
 
-        cpu.address = startAddress
+        cpu.setAddress(startAddress)
     }
 }
