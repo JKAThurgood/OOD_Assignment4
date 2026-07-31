@@ -14,38 +14,40 @@ class D5700Computer(
     display: Display? = null,
     inputDevice: Keyboard? = null
 ) {
-    val ram = RAM()
-    val rom = ROM(writable = true)
-    val screen: Display = display ?: Screen()
-    private val keyboard: Keyboard = inputDevice ?: Keyboard()
+    private val rom = ROM(writable = true)
+    private val ram = RAM()
 
-    private val hardware = Hardware(
-        ram = ram,
-        rom = rom,
-        display = screen,
-        input = keyboard
+    private val screen: Display = display ?: Screen()
+
+    val cpu = CPU(
+        Hardware(
+            ram = ram,
+            rom = rom,
+            display = screen,
+            input = inputDevice ?: Keyboard()
+        )
     )
-
-    val cpu = CPU(hardware)
 
     private val cpuScheduler = CpuScheduler(cpu)
     private val timerService = TimerService(cpu)
 
     fun loadProgram(data: ByteArray) {
-        require(data.size <= 4096) {
-            "Program data must fit in ROM"
+        rom.loadProgram(data)
+    }
+
+    fun run(program: ByteArray) {
+        loadProgram(program)
+        reset()
+        start()
+
+        while (!cpu.isHalted()) {
+            Thread.sleep(1)
         }
 
-        for (index in data.indices) {
-            rom.write(index, data[index])
-        }
+        stop()
     }
 
     fun start() {
-        if (cpu.isHalted()) {
-            cpu.terminate("Program already halted")
-        }
-
         cpuScheduler.start()
         timerService.start()
     }

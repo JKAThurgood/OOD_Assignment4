@@ -14,7 +14,7 @@ package "Facade" {
         -cpuScheduler : CpuScheduler
         -timerService : TimerService
 
-        +loadProgram(data: ByteArray)
+        +loadProgram(data:ByteArray)
         +start()
         +stop()
         +reset()
@@ -47,7 +47,7 @@ package "CPU" {
         +cycle()
         +fetchInstruction() : Short
         +switchMemory()
-        +terminate(msg:String)
+        +terminate(message:String)
     }
 
     class Hardware {
@@ -55,11 +55,65 @@ package "CPU" {
         -rom : MemoryDevice?
         -display : Display?
         -input : InputDevice?
+    }
+}
 
-        +getMemoryController() : MemoryController
-        +getROM() : MemoryDevice?
-        +draw(ascii:Byte,row:Int,column:Int)
-        +readInput() : Byte
+package "Memory" {
+
+    interface MemoryDevice {
+        +read(address:Int) : Byte
+        +write(address:Int,value:Byte)
+    }
+
+    class RAM {
+        -data : Byte[4096]
+    }
+
+    class ROM {
+        -data : Byte[4096]
+        -writable : Boolean
+
+        +loadProgram(data:ByteArray)
+    }
+
+    class MemoryController {
+        -ram : MemoryDevice?
+        -rom : MemoryDevice?
+        -strategy : MemoryStrategy?
+
+        +read(cpu:CPU) : Byte
+        +write(cpu:CPU,value:Byte)
+        +switchMode()
+        +reset()
+        +hasMemory() : Boolean
+    }
+
+    MemoryDevice <|.. RAM
+    MemoryDevice <|.. ROM
+}
+
+package "Strategy" {
+
+    interface MemoryStrategy {
+        +read(cpu:CPU) : Byte
+        +write(cpu:CPU,value:Byte)
+        +next(ram:MemoryDevice?,rom:MemoryDevice?) : MemoryStrategy
+    }
+
+    class RamStrategy
+    class RomStrategy
+
+    MemoryStrategy <|.. RamStrategy
+    MemoryStrategy <|.. RomStrategy
+}
+
+package "Factory" {
+
+    class InstructionFactory <<Factory>> {
+        -creators : Map<Int, () -> Instruction>
+
+        +create(opcode:Short) : Instruction
+        -registerInstructions()
     }
 }
 
@@ -121,61 +175,6 @@ package "Instructions" {
     ConvertAsciiInstruction -[hidden]- DrawInstruction
 }
 
-package "Factory" {
-
-    class InstructionFactory <<Factory>> {
-        -creators : Map<Int, () -> Instruction>
-        +create(opcode:Short) : Instruction
-        -registerInstructions()
-    }
-}
-
-package "Memory" {
-
-    interface MemoryDevice {
-        +read(address:Int) : Byte
-        +write(address:Int,value:Byte)
-    }
-
-    class RAM {
-        -data : Byte[4096]
-    }
-
-    class ROM {
-        -data : Byte[4096]
-        -writable : Boolean
-    }
-
-    class MemoryController {
-        -ram : MemoryDevice?
-        -rom : MemoryDevice?
-        -strategy : MemoryStrategy?
-
-        +read(cpu:CPU) : Byte
-        +write(cpu:CPU,value:Byte)
-        +switchMode()
-        +reset()
-        +hasMemory() : Boolean
-    }
-
-    MemoryDevice <|.. RAM
-    MemoryDevice <|.. ROM
-}
-
-package "Strategy" {
-
-    interface MemoryStrategy {
-        +read(cpu:CPU) : Byte
-        +write(cpu:CPU,value:Byte)
-    }
-
-    class RamStrategy
-    class RomStrategy
-
-    MemoryStrategy <|.. RamStrategy
-    MemoryStrategy <|.. RomStrategy
-}
-
 package "IO" {
 
     interface Display {
@@ -186,7 +185,6 @@ package "IO" {
 
     class Screen {
         -frameBuffer : Byte[64]
-
         +draw(ascii:Byte,row:Int,col:Int)
         +render()
         +clear()
@@ -229,16 +227,18 @@ D5700Computer *-- Keyboard
 D5700Computer *-- CpuScheduler
 D5700Computer *-- TimerService
 
+D5700Computer ..> ROM : delegates loadProgram()
+
 CPU *-- Hardware
 CPU *-- MemoryController
 CPU --> InstructionFactory
 
-Hardware --> MemoryController
-Hardware --> Display
-Hardware --> InputDevice
-
 MemoryController --> MemoryStrategy
 MemoryController --> MemoryDevice
+
+Hardware --> MemoryDevice
+Hardware --> Display
+Hardware --> InputDevice
 
 InstructionFactory ..> Instruction
 

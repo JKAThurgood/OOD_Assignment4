@@ -29,13 +29,6 @@ fun main() {
     }
 
     val computer = D5700Computer()
-    computer.loadProgram(program)
-    computer.start()
-
-    while (!computer.cpu.isHalted()) {
-        Thread.sleep(10)
-    }
-
-    computer.stop()
+    computer.run(program)
     println("Program completed.")
 }
